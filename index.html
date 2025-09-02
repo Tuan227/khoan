@@ -1,76 +1,169 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Item List with Bottom Navigation</title>
+<title>Item Browser iOS Style</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; display: flex; flex-direction: column; height: 100vh; }
-  #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  #search { width: 95%; margin: 10px auto; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
+:root {
+  --bg-color: #f5f5f7;
+  --card-bg: #ffffff;
+  --text-color: #000000;
+  --nav-bg: #ffffff;
+  --highlight: #007aff;
+}
+[data-theme="dark"] {
+  --bg-color: #1c1c1e;
+  --card-bg: #2c2c2e;
+  --text-color: #ffffff;
+  --nav-bg: #1c1c1e;
+  --highlight: #0a84ff;
+}
 
-  .tab-content { flex: 1; overflow-y: auto; padding: 10px; }
-  .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
+body {
+  margin:0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
 
-  .item-card { position: relative; border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; background: white; }
+header {
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: var(--nav-bg);
+  position: sticky;
+  top:0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
 
-  .item-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+header input {
+  flex:1;
+  margin-left:10px;
+  padding:8px 12px;
+  border-radius: 12px;
+  border:1px solid #ccc;
+  font-size: 16px;
+}
 
-  .item-card img.main-icon { width: 60px; height: 60px; object-fit: contain; margin-bottom: 5px; }
-  .item-card img.unique-icon { width: 20px; height: 20px; position: absolute; top: 5px; right: 5px; }
-  .item-card img.icon-ab { width: 20px; height: 20px; position: absolute; bottom: 5px; right: 5px; }
+header button {
+  margin-left:10px;
+  padding: 6px 12px;
+  border:none;
+  border-radius: 10px;
+  background: var(--highlight);
+  color:white;
+  font-weight: bold;
+  cursor:pointer;
+}
 
-  /* Rare Colors */
-  .none { background: #e0e0e0; }
-  .common { background: #a8e6cf; }
-  .uncommon { background: #ffd3b6; }
-  .rare { background: #ffaaa5; }
-  .epic { background: #d291bc; }
-  .legend { background: #ffeb3b; }
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+  gap:12px;
+  padding:10px;
+  overflow-y: auto;
+  height: calc(100vh - 120px); /* header + nav */
+}
 
-  /* Tooltip */
-  .tooltip {
-    position: absolute;
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 10;
-    white-space: nowrap;
-  }
+.item-card {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.item-card img.main-icon { width:60px; height:60px; object-fit: contain; margin-bottom:5px;}
+.item-card img.unique-icon {width:20px;height:20px; position:absolute; top:5px; right:5px;}
+.item-card img.icon-ab {width:20px;height:20px; position:absolute; bottom:5px; right:5px;}
 
-  /* Modal */
-  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-  .modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; position: relative; }
-  .close { position: absolute; top: 10px; right: 15px; font-size: 18px; cursor: pointer; }
-  .modal-content h3 { margin-top: 0; }
-  .modal-content p { margin: 5px 0; }
+.tooltip {
+  position:absolute;
+  background: rgba(0,0,0,0.8);
+  color:white;
+  padding:5px 10px;
+  border-radius:6px;
+  font-size:12px;
+  pointer-events:none;
+  opacity:0;
+  transition: opacity 0.2s;
+  z-index:10;
+  white-space: nowrap;
+}
 
-  /* Bottom Navigation */
-  .bottom-nav { display: flex; height: 50px; background: #fff; border-top: 1px solid #ccc; }
-  .bottom-nav button { flex: 1; border: none; background: none; font-size: 14px; cursor: pointer; outline: none; transition: background 0.2s; }
-  .bottom-nav button.active { background: #d3d3d3; }
+.modal {
+  display:none;
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center; align-items:center;
+}
+.modal-content {
+  background: var(--card-bg);
+  padding:20px;
+  border-radius: 12px;
+  max-width:450px;
+  width:90%;
+  position: relative;
+  color: var(--text-color);
+}
+.modal-content h3 {margin-top:0;}
+.modal-content p {margin:5px 0;}
+.close {
+  position:absolute;
+  top:10px; right:15px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom:0; left:0; width:100%;
+  background: var(--nav-bg);
+  display:flex;
+  justify-content:space-around;
+  padding:8px 0;
+  box-shadow:0 -1px 3px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+.bottom-nav button {
+  flex:1;
+  border:none;
+  background:none;
+  padding:6px;
+  font-size:14px;
+  color: var(--text-color);
+  cursor:pointer;
+}
+.bottom-nav button.active {
+  color: var(--highlight);
+  font-weight:bold;
+}
 
 </style>
 </head>
-<body>
+<body data-theme="light">
 
-<div id="content">
-  <input type="text" id="search" placeholder="Tìm kiếm item...">
-  <div id="tabs-container">
-    <!-- Tab contents sẽ tạo bằng JS -->
-  </div>
-</div>
+<header>
+  <label for="search"></label>
+  <input type="text" id="search" placeholder="Search items...">
+  <button id="search-btn">🔍</button>
+  <button id="theme-btn">🌙</button>
+</header>
 
-<!-- Tooltip -->
+<div class="item-grid" id="item-grid"></div>
+
 <div id="tooltip" class="tooltip"></div>
 
-<!-- Modal -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="close" id="modal-close">&times;</span>
@@ -78,152 +171,153 @@
   </div>
 </div>
 
-<!-- Bottom Navigation -->
 <div class="bottom-nav" id="bottom-nav">
-  <!-- Buttons tạo bằng JS -->
+  <!-- Buttons sẽ sinh ra dựa trên Type -->
 </div>
 
 <script>
-  let itemsData = [];
-  let currentType = '';
+let allItems = [];
+let currentType = '';
 
-  async function loadItems() {
-    try {
-      const res = await fetch('items-OB50-live.json');
-      itemsData = await res.json();
-      const types = [...new Set(itemsData.map(i => i.Type))]; // Lấy các Type duy nhất
-      createTabs(types);
-      createBottomNav(types);
-      switchTab(types[0]);
-    } catch(err) {
-      console.error('Lỗi khi load JSON:', err);
-    }
+async function loadItems(){
+  try{
+    const res = await fetch('items-OB50-live.json');
+    allItems = await res.json();
+    initNavigation();
+    displayItemsByType(allItems[0]?.Type || '');
+  }catch(err){
+    console.error('Error loading JSON', err);
   }
+}
 
-  function getRareClass(rare) {
-    switch((rare||'NONE').toLowerCase()) {
-      case 'common': return 'common';
-      case 'uncommon': return 'uncommon';
-      case 'rare': return 'rare';
-      case 'epic': return 'epic';
-      case 'legend': return 'legend';
-      case 'none': return 'none';
-      default: return 'none';
-    }
+function getRareClass(rare){
+  switch((rare||"NONE").toLowerCase()){
+    case 'common': return 'common';
+    case 'uncommon': return 'uncommon';
+    case 'rare': return 'rare';
+    case 'epic': return 'epic';
+    case 'legend': return 'legend';
+    case 'none': return 'none';
+    default: return 'none';
   }
+}
 
-  function createTabs(types) {
-    const container = document.getElementById('tabs-container');
-    container.innerHTML = '';
-    types.forEach(type => {
-      const tab = document.createElement('div');
-      tab.className = 'tab-content';
-      tab.id = `tab-${type}`;
-      tab.style.display = 'none';
-      container.appendChild(tab);
+function initNavigation(){
+  const nav = document.getElementById('bottom-nav');
+  const types = [...new Set(allItems.map(item=>item.Type))];
+  nav.innerHTML = '';
+  types.forEach((type,i)=>{
+    const btn = document.createElement('button');
+    btn.innerText = type || 'Other';
+    if(i===0) btn.classList.add('active');
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      displayItemsByType(type);
     });
-  }
+    nav.appendChild(btn);
+  });
+}
 
-  function createBottomNav(types) {
-    const nav = document.getElementById('bottom-nav');
-    nav.innerHTML = '';
-    types.forEach(type => {
-      const btn = document.createElement('button');
-      btn.innerText = type;
-      btn.addEventListener('click', () => switchTab(type));
-      nav.appendChild(btn);
-    });
-  }
-
-  function switchTab(type) {
-    currentType = type;
-    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-    document.getElementById(`tab-${type}`).style.display = 'grid';
-    displayItemsByType(type);
-
-    // Cập nhật active button
-    document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active'));
-    Array.from(document.querySelectorAll('.bottom-nav button')).find(b => b.innerText === type)?.classList.add('active');
-  }
-
-  function displayItemsByType(type) {
-    const container = document.getElementById(`tab-${type}`);
-    const tooltip = document.getElementById('tooltip');
-    const items = itemsData.filter(i => i.Type === type);
-    container.innerHTML = '';
-    container.className = 'tab-content item-grid';
-    items.forEach(item => {
-      const card = document.createElement('div');
-      card.className = `item-card ${getRareClass(item.Rare)}`;
-      card.innerHTML = `
-        <img class="main-icon" src="${item.Icon}" alt="${item.name}">
-        ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
-        ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
-        <div>${item.name}</div>
-      `;
-
-      // Tooltip hover
-      card.addEventListener('mouseenter', (e) => {
-        tooltip.innerHTML = `<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
-        tooltip.style.opacity = 1;
-      });
-      card.addEventListener('mousemove', (e) => {
-        tooltip.style.left = e.pageX + 10 + 'px';
-        tooltip.style.top = e.pageY + 10 + 'px';
-      });
-      card.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
-
-      // Click popup
-      card.addEventListener('click', () => showDetail(item));
-
-      container.appendChild(card);
-    });
-  }
-
-  function showDetail(item) {
-    const detail = document.getElementById('detail-content');
-    detail.innerHTML = `
-      <h3>${item.name}</h3>
-      <img src="${item.Icon}" alt="${item.name}" style="width:80px; height:80px; object-fit:contain; margin-bottom:10px;">
-      <p><strong>ID:</strong> ${item.Id}</p>
-      <p><strong>Type:</strong> ${item.Type}</p>
-      <p><strong>Collection:</strong> ${item.collectionType}</p>
-      <p><strong>Description:</strong> ${item.desc}</p>
-      <p><strong>Rare:</strong> ${item.Rare}</p>
-      <p><strong>IsUnique:</strong> ${item.IsUnique}</p>
-      <p><strong>IconInAB:</strong> ${item.IconInAB || 'Không có'}</p>
+function displayItemsByType(type){
+  currentType = type;
+  const grid = document.getElementById('item-grid');
+  const tooltip = document.getElementById('tooltip');
+  const filtered = allItems.filter(item=>item.Type===type);
+  grid.innerHTML='';
+  filtered.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = `item-card ${getRareClass(item.Rare)}`;
+    card.innerHTML=`
+      <img class="main-icon" src="${item.Icon}" alt="${item.name}">
+      ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
+      ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
+      <div>${item.name}</div>
     `;
-    document.getElementById('modal').style.display = 'flex';
-  }
-
-  document.getElementById('modal-close').addEventListener('click', () => {
-    document.getElementById('modal').style.display = 'none';
-  });
-  window.addEventListener('click', (e) => {
-    if (e.target.id === 'modal') document.getElementById('modal').style.display = 'none';
-  });
-
-  // Search theo tab hiện tại
-  document.getElementById('search').addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    const filtered = itemsData.filter(i => i.Type === currentType && i.name.toLowerCase().includes(query));
-    const container = document.getElementById(`tab-${currentType}`);
-    container.innerHTML = '';
-    filtered.forEach(item => {
-      const card = document.createElement('div');
-      card.className = `item-card ${getRareClass(item.Rare)}`;
-      card.innerHTML = `
-        <img class="main-icon" src="${item.Icon}" alt="${item.name}">
-        ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
-        ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
-        <div>${item.name}</div>
-      `;
-      card.addEventListener('click', () => showDetail(item));
-      container.appendChild(card);
+    card.addEventListener('mouseenter',(e)=>{
+      tooltip.innerHTML=`<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
+      tooltip.style.opacity=1;
     });
+    card.addEventListener('mousemove',(e)=>{
+      tooltip.style.left=e.pageX+10+'px';
+      tooltip.style.top=e.pageY+10+'px';
+    });
+    card.addEventListener('mouseleave',()=>{tooltip.style.opacity=0;});
+    card.addEventListener('click',()=>showDetail(item));
+    grid.appendChild(card);
   });
+}
 
-  loadItems();
+// Popup
+function showDetail(item){
+  const detail = document.getElementById('detail-content');
+  detail.innerHTML = `
+    <h3>${item.name}</h3>
+    <img src="${item.Icon}" alt="${item.name}" style="width:80px;height:80px;margin-bottom:10px;object-fit:contain;">
+    <p><strong>ID:</strong> ${item.Id}</p>
+    <p><strong>Type:</strong> ${item.Type}</p>
+    <p><strong>Collection:</strong> ${item.collectionType}</p>
+    <p><strong>Description:</strong> ${item.desc}</p>
+    <p><strong>Rare:</strong> ${item.Rare}</p>
+    <p><strong>IsUnique:</strong> ${item.IsUnique}</p>
+    <p><strong>IconInAB:</strong> ${item.IconInAB || 'None'}</p>
+  `;
+  document.getElementById('modal').style.display='flex';
+}
+
+document.getElementById('modal-close').addEventListener('click',()=>{
+  document.getElementById('modal').style.display='none';
+});
+window.addEventListener('click',(e)=>{
+  if(e.target.id==='modal') document.getElementById('modal').style.display='none';
+});
+
+// Search function (ignore case + international)
+function searchItems(){
+  const keyword = document.getElementById('search').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const filtered = allItems.filter(item=>{
+    if(item.Type!==currentType) return false;
+    const nameNorm = (item.name||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return nameNorm.includes(keyword);
+  });
+  const grid = document.getElementById('item-grid');
+  grid.innerHTML='';
+  const tooltip = document.getElementById('tooltip');
+  filtered.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = `item-card ${getRareClass(item.Rare)}`;
+    card.innerHTML=`
+      <img class="main-icon" src="${item.Icon}" alt="${item.name}">
+      ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
+      ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
+      <div>${item.name}</div>
+    `;
+    card.addEventListener('mouseenter',(e)=>{
+      tooltip.innerHTML=`<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
+      tooltip.style.opacity=1;
+    });
+    card.addEventListener('mousemove',(e)=>{
+      tooltip.style.left=e.pageX+10+'px';
+      tooltip.style.top=e.pageY+10+'px';
+    });
+    card.addEventListener('mouseleave',()=>{tooltip.style.opacity=0;});
+    card.addEventListener('click',()=>showDetail(item));
+    grid.appendChild(card);
+  });
+}
+
+// Events
+document.getElementById('search').addEventListener('input', searchItems);
+document.getElementById('search-btn').addEventListener('click', searchItems);
+
+// Theme toggle
+document.getElementById('theme-btn').addEventListener('click',()=>{
+  const body = document.body;
+  if(body.dataset.theme==='light') body.dataset.theme='dark';
+  else body.dataset.theme='light';
+});
+
+loadItems();
 </script>
 
 </body>
