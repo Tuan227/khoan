@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Item Browser iOS Style</title>
+<title>Item Browser Full</title>
 <style>
 :root {
   --bg-color: #f5f5f7;
@@ -57,6 +57,10 @@ header button {
   color:white;
   font-weight: bold;
   cursor:pointer;
+  transition: background 0.2s;
+}
+header button:hover {
+  background: darken(var(--highlight),10%);
 }
 
 .item-grid {
@@ -111,7 +115,7 @@ header button {
   background: var(--card-bg);
   padding:20px;
   border-radius: 12px;
-  max-width:450px;
+  max-width:500px;
   width:90%;
   position: relative;
   color: var(--text-color);
@@ -154,10 +158,9 @@ header button {
 <body data-theme="light">
 
 <header>
-  <label for="search"></label>
   <input type="text" id="search" placeholder="Search items...">
-  <button id="search-btn">🔍</button>
-  <button id="theme-btn">🌙</button>
+  <button id="search-btn"></button>
+  <button id="theme-btn"></button>
 </header>
 
 <div class="item-grid" id="item-grid"></div>
@@ -171,9 +174,7 @@ header button {
   </div>
 </div>
 
-<div class="bottom-nav" id="bottom-nav">
-  <!-- Buttons sẽ sinh ra dựa trên Type -->
-</div>
+<div class="bottom-nav" id="bottom-nav"></div>
 
 <script>
 let allItems = [];
@@ -205,7 +206,7 @@ function getRareClass(rare){
 function initNavigation(){
   const nav = document.getElementById('bottom-nav');
   const types = [...new Set(allItems.map(item=>item.Type))];
-  nav.innerHTML = '';
+  nav.innerHTML='';
   types.forEach((type,i)=>{
     const btn = document.createElement('button');
     btn.innerText = type || 'Other';
@@ -225,35 +226,36 @@ function displayItemsByType(type){
   const tooltip = document.getElementById('tooltip');
   const filtered = allItems.filter(item=>item.Type===type);
   grid.innerHTML='';
-  filtered.forEach(item=>{
-    const card = document.createElement('div');
-    card.className = `item-card ${getRareClass(item.Rare)}`;
-    card.innerHTML=`
-      <img class="main-icon" src="${item.Icon}" alt="${item.name}">
-      ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
-      ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
-      <div>${item.name}</div>
-    `;
-    card.addEventListener('mouseenter',(e)=>{
-      tooltip.innerHTML=`<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
-      tooltip.style.opacity=1;
-    });
-    card.addEventListener('mousemove',(e)=>{
-      tooltip.style.left=e.pageX+10+'px';
-      tooltip.style.top=e.pageY+10+'px';
-    });
-    card.addEventListener('mouseleave',()=>{tooltip.style.opacity=0;});
-    card.addEventListener('click',()=>showDetail(item));
-    grid.appendChild(card);
-  });
+  filtered.forEach(item=>createCard(grid,item,tooltip));
 }
 
-// Popup
+function createCard(grid,item,tooltip){
+  const card = document.createElement('div');
+  card.className = `item-card ${getRareClass(item.Rare)}`;
+  card.innerHTML=`
+    <img class="main-icon" src="${item.icon}" alt="${item.name}">
+    ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
+    ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
+    <div>${item.name}</div>
+  `;
+  card.addEventListener('mouseenter',(e)=>{
+    tooltip.innerHTML=`<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
+    tooltip.style.opacity=1;
+  });
+  card.addEventListener('mousemove',(e)=>{
+    tooltip.style.left=e.pageX+10+'px';
+    tooltip.style.top=e.pageY+10+'px';
+  });
+  card.addEventListener('mouseleave',()=>{tooltip.style.opacity=0;});
+  card.addEventListener('click',()=>showDetail(item));
+  grid.appendChild(card);
+}
+
 function showDetail(item){
   const detail = document.getElementById('detail-content');
   detail.innerHTML = `
     <h3>${item.name}</h3>
-    <img src="${item.Icon}" alt="${item.name}" style="width:80px;height:80px;margin-bottom:10px;object-fit:contain;">
+    <img src="${item.icon}" alt="${item.name}" style="width:80px;height:80px;margin-bottom:10px;object-fit:contain;">
     <p><strong>ID:</strong> ${item.Id}</p>
     <p><strong>Type:</strong> ${item.Type}</p>
     <p><strong>Collection:</strong> ${item.collectionType}</p>
@@ -272,53 +274,35 @@ window.addEventListener('click',(e)=>{
   if(e.target.id==='modal') document.getElementById('modal').style.display='none';
 });
 
-// Search function (ignore case + international)
+// Search all items
 function searchItems(){
   const keyword = document.getElementById('search').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const filtered = allItems.filter(item=>{
-    if(item.Type!==currentType) return false;
-    const nameNorm = (item.name||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return nameNorm.includes(keyword);
-  });
   const grid = document.getElementById('item-grid');
-  grid.innerHTML='';
   const tooltip = document.getElementById('tooltip');
-  filtered.forEach(item=>{
-    const card = document.createElement('div');
-    card.className = `item-card ${getRareClass(item.Rare)}`;
-    card.innerHTML=`
-      <img class="main-icon" src="${item.Icon}" alt="${item.name}">
-      ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
-      ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
-      <div>${item.name}</div>
-    `;
-    card.addEventListener('mouseenter',(e)=>{
-      tooltip.innerHTML=`<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
-      tooltip.style.opacity=1;
+  let filtered;
+  if(keyword.trim()===''){
+    displayItemsByType(currentType);
+    return;
+  } else {
+    filtered = allItems.filter(item=>{
+      const nameNorm = (item.name||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return nameNorm.includes(keyword);
     });
-    card.addEventListener('mousemove',(e)=>{
-      tooltip.style.left=e.pageX+10+'px';
-      tooltip.style.top=e.pageY+10+'px';
-    });
-    card.addEventListener('mouseleave',()=>{tooltip.style.opacity=0;});
-    card.addEventListener('click',()=>showDetail(item));
-    grid.appendChild(card);
-  });
+  }
+  grid.innerHTML='';
+  filtered.forEach(item=>createCard(grid,item,tooltip));
 }
 
-// Events
 document.getElementById('search').addEventListener('input', searchItems);
 document.getElementById('search-btn').addEventListener('click', searchItems);
 
-// Theme toggle
+// Smooth theme toggle
 document.getElementById('theme-btn').addEventListener('click',()=>{
-  const body = document.body;
-  if(body.dataset.theme==='light') body.dataset.theme='dark';
-  else body.dataset.theme='light';
+  const body=document.body;
+  body.dataset.theme=(body.dataset.theme==='light')?'dark':'light';
 });
 
 loadItems();
 </script>
-
 </body>
 </html>
