@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item List Full All</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    #search { width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
+
+    .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
+
+    .item-card { position: relative; border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; background: white; }
+
+    .item-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+    .item-card img.main-icon { width: 60px; height: 60px; object-fit: contain; margin-bottom: 5px; }
+    .item-card img.unique-icon { width: 20px; height: 20px; position: absolute; top: 5px; right: 5px; }
+    .item-card img.icon-ab { width: 20px; height: 20px; position: absolute; bottom: 5px; right: 5px; }
+
+    /* Rare Colors */
+    .none { background: #e0e0e0; }
+    .common { background: #a8e6cf; }
+    .uncommon { background: #ffd3b6; }
+    .rare { background: #ffaaa5; }
+    .epic { background: #d291bc; }
+    .legend { background: #ffeb3b; }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; position: relative; }
+    .close { position: absolute; top: 10px; right: 15px; font-size: 18px; cursor: pointer; }
+
+    .modal-content h3 { margin-top: 0; }
+    .modal-content p { margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+  <input type="text" id="search" placeholder="Tìm kiếm item...">
+  <div class="item-grid" id="item-grid"></div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <!-- Popup Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close" id="modal-close">&times;</span>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
+  <script>
+    async function loadItems() {
+      try {
+        const res = await fetch('items-OB50-live.json');
+        const items = await res.json();
+        return items;
+      } catch (err) {
+        console.error('Lỗi khi load JSON:', err);
+        return [];
+      }
+    }
+
+    function getRareClass(rare) {
+      switch ((rare || "NONE").toLowerCase()) {
+        case 'common': return 'common';
+        case 'uncommon': return 'uncommon';
+        case 'rare': return 'rare';
+        case 'epic': return 'epic';
+        case 'legend': return 'legend';
+        case 'none': return 'none';
+        default: return 'none';
+      }
+    }
+
+    function displayItems(items) {
+      const grid = document.getElementById('item-grid');
+      grid.innerHTML = '';
+      const tooltip = document.getElementById('tooltip');
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `item-card ${getRareClass(item.Rare)}`;
+        card.innerHTML = `
+          <img class="main-icon" src="${item.Icon}" alt="${item.name}">
+          ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
+          ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
+          <div>${item.name}</div>
+        `;
+
+        // Tooltip hover
+        card.addEventListener('mouseenter', (e) => {
+          tooltip.innerHTML = `<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
+          tooltip.style.opacity = 1;
+        });
+        card.addEventListener('mousemove', (e) => {
+          tooltip.style.left = e.pageX + 10 + 'px';
+          tooltip.style.top = e.pageY + 10 + 'px';
+        });
+        card.addEventListener('mouseleave', () => {
+          tooltip.style.opacity = 0;
+        });
+
+        card.addEventListener('click', () => showDetail(item));
+        grid.appendChild(card);
+      });
+    }
+
+    function showDetail(item) {
+      const detail = document.getElementById('detail-content');
+      detail.innerHTML = `
+        <h3>${item.name}</h3>
+        <img src="${item.Icon}" alt="${item.name}" style="width:80px; height:80px; object-fit:contain; margin-bottom:10px;">
+        <p><strong>ID:</strong> ${item.Id}</p>
+        <p><strong>Type:</strong> ${item.Type}</p>
+        <p><strong>Collection:</strong> ${item.collectionType}</p>
+        <p><strong>Description:</strong> ${item.desc}</p>
+        <p><strong>Rare:</strong> ${item.Rare}</p>
+        <p><strong>IsUnique:</strong> ${item.IsUnique}</p>
+        <p><strong>IconInAB:</strong> ${item.IconInAB || 'Không có'}</p>
+      `;
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('modal').style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+      if (e.target.id === 'modal') {
+        document.getElementById('modal').style.display = 'none';
+      }
+    });
+
+    function setupSearch(items) {
+      const searchInput = document.getElementById('search');
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        const filtered = items.filter(item => item.name.toLowerCase().includes(query));
+        displayItems(filtered);
+      });
+    }
+
+    loadItems().then(items => {
+      displayItems(items);
+      setupSearch(items);
+    });
+  </script>
+
+</body>
+</html>
