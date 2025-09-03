@@ -96,7 +96,7 @@
             let currentFilteredData = [];
             let currentPage = 1;
 
-            // --- Function để tải dữ liệu ---
+            // --- Function to fetch data ---
             const fetchData = async () => {
                 try {
                     const response = await fetch(DATA_FILE);
@@ -113,9 +113,14 @@
                 }
             };
 
-            // --- Function để hiển thị các item cho trang hiện tại ---
+            // --- Function to show loading message ---
+            const showLoading = () => {
+                itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading...</p>`;
+            };
+
+            // --- Function to render items for the current page ---
             const renderItems = () => {
-                itemListContainer.innerHTML = ''; // Xóa nội dung cũ
+                itemListContainer.innerHTML = ''; // Clear old content
                 if (currentFilteredData.length === 0) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
                     return;
@@ -140,7 +145,7 @@
                 });
             };
 
-            // --- Function để tạo các nút phân trang ---
+            // --- Function to create pagination buttons ---
             const renderPagination = () => {
                 paginationContainer.innerHTML = '';
                 const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
@@ -155,16 +160,19 @@
                         pageButton.classList.add('bg-gray-200', 'text-gray-700');
                     }
                     pageButton.addEventListener('click', () => {
+                        showLoading();
                         currentPage = i;
                         renderPagination();
-                        renderItems();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setTimeout(() => {
+                            renderItems();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }, 100);
                     });
                     paginationContainer.appendChild(pageButton);
                 }
             };
 
-            // --- Function để hiển thị modal với chi tiết item ---
+            // --- Function to show modal with item details ---
             const showItemDetails = (item) => {
                 modalTitle.textContent = item.name || 'Item Details';
                 modalContent.innerHTML = `
@@ -185,7 +193,7 @@
                 }, 10);
             };
 
-            // --- Function để ẩn modal ---
+            // --- Function to hide modal ---
             const hideModal = () => {
                 modalContainer.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 modalContainer.querySelector('div').classList.add('scale-95', 'opacity-0');
@@ -194,20 +202,33 @@
                 }, 300);
             };
 
-            // --- Xử lý sự kiện tìm kiếm ---
+            // --- Search event handler ---
             const handleSearch = () => {
+                showLoading();
                 const query = searchInput.value.toLowerCase();
                 currentFilteredData = craftlandData.filter(item => {
+                    const id = String(item.Id).toLowerCase();
+                    const type = item.Type ? item.Type.toLowerCase() : '';
+                    const collectionType = item.collectionType ? item.collectionType.toLowerCase() : '';
                     const name = item.name ? item.name.toLowerCase() : '';
                     const desc = item.desc ? item.desc.toLowerCase() : '';
-                    return name.includes(query) || desc.includes(query);
+                    const icon = item.Icon ? item.Icon.toLowerCase() : '';
+
+                    return id.includes(query) ||
+                           type.includes(query) ||
+                           collectionType.includes(query) ||
+                           name.includes(query) ||
+                           desc.includes(query) ||
+                           icon.includes(query);
                 });
                 currentPage = 1;
                 renderPagination();
-                renderItems();
+                setTimeout(() => {
+                    renderItems();
+                }, 100);
             };
 
-            // --- Thêm các event listener ---
+            // --- Add event listeners ---
             closeModalBtn.addEventListener('click', hideModal);
             modalContainer.addEventListener('click', (e) => {
                 if (e.target.id === 'modal-container') {
@@ -222,7 +243,7 @@
                 }
             });
 
-            // Lần đầu tải dữ liệu
+            // Initial data fetch
             fetchData();
         });
     </script>
