@@ -1,269 +1,206 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dữ Liệu Craftland</title>
+    <title>Craftland Data Viewer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a2e;
-            color: #ffffff;
+            background-color: #f3f4f6;
         }
-        .icon-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 16px;
-            padding: 24px;
-            max-width: 1200px;
-            margin: auto;
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
         }
-        .icon-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #272744;
-            padding: 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .icon-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-        .icon-image {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            border-radius: 8px;
-            background-color: #3b3b5c;
-            padding: 8px;
-        }
-        .modal {
+        .scroll-container::-webkit-scrollbar {
             display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            padding-top: 60px;
         }
-        .modal-content {
-            background-color: #272744;
-            margin: 5% auto;
-            padding: 24px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            animation-name: animatetop;
-            animation-duration: 0.4s;
-        }
-        @keyframes animatetop {
-            from { top: -300px; opacity: 0; }
-            to { top: 0; opacity: 1; }
-        }
-        .close-btn {
-            color: #ffffff;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .close-btn:hover,
-        .close-btn:focus {
-            color: #e53e3e;
-        }
-        .data-container {
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            font-size: 14px;
-            line-height: 1.5;
-            background-color: #1a1a2e;
-            padding: 16px;
-            border-radius: 8px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        .copy-btn {
-            background-color: #38b2ac;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.2s;
-        }
-        .copy-btn:hover {
-            background-color: #319795;
-        }
-        .copy-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #48bb78;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            z-index: 101;
-        }
-        /* Style cho thanh cuộn */
-        .data-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .data-container::-webkit-scrollbar-track {
-            background: #272744;
-            border-radius: 10px;
-        }
-        .data-container::-webkit-scrollbar-thumb {
-            background-color: #4a4a6e;
-            border-radius: 10px;
-            border: 2px solid #272744;
+        .scroll-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-7xl mx-auto p-6 bg-slate-800 rounded-lg shadow-lg">
-        <h1 class="text-3xl font-bold text-center mb-6 text-teal-400">Dữ liệu Craftland</h1>
-        <p class="text-center text-gray-300 mb-8">Nhấp vào một icon để xem chi tiết dữ liệu.</p>
-        <div id="iconGrid" class="icon-container">
-            <!-- Icons sẽ được chèn vào đây bởi JavaScript -->
-        </div>
-    </div>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <!-- Modal để hiển thị dữ liệu chi tiết -->
-    <div id="dataModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 class="text-xl font-bold mb-4">Chi tiết dữ liệu</h2>
-            <div id="dataDisplay" class="data-container">
-                <!-- Dữ liệu sẽ được chèn vào đây -->
+    <!-- Header and Search Bar -->
+    <header class="bg-white shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
+            <div class="relative w-full sm:w-1/2">
+                <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
             </div>
-            <button id="copyBtn" class="copy-btn">Sao chép dữ liệu</button>
+        </div>
+    </header>
+
+    <!-- Main content area -->
+    <main class="flex-grow p-4 overflow-auto scroll-container pb-20">
+        <div id="item-list-container" class="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading data...</p>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50">
+        <div class="max-w-4xl mx-auto flex justify-around items-center">
+            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="ALL">
+                <span class="block">All</span>
+            </button>
+            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="AVATAR">
+                <span class="block">Avatar</span>
+            </button>
+            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="WEAPON">
+                <span class="block">Weapon</span>
+            </button>
+            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="EMOTE">
+                <span class="block">Emote</span>
+            </button>
+            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="DEBRIS">
+                <span class="block">Debris</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal for displaying item details -->
+    <div id="modal-container" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 relative transform scale-95 opacity-0 transition-all duration-300 ease-out">
+            <button id="close-modal-btn" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 id="modal-title" class="text-xl font-bold mb-4 text-gray-800">Item Details</h2>
+            <div id="modal-content" class="text-gray-700 space-y-2">
+                <!-- Item details will be inserted here by JavaScript -->
+            </div>
         </div>
     </div>
 
-    <div id="copyMessage" class="copy-message">Đã sao chép!</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const DATA_FILE = 'Craftland.json';
+            const itemListContainer = document.getElementById('item-list-container');
+            const searchInput = document.getElementById('search-input');
+            const navButtons = document.querySelectorAll('.nav-button');
+            const modalContainer = document.getElementById('modal-container');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            
+            let craftlandData = [];
+            let currentData = [];
 
-    <script type="module">
-        // Lấy các phần tử DOM
-        const iconGrid = document.getElementById('iconGrid');
-        const dataModal = document.getElementById('dataModal');
-        const dataDisplay = document.getElementById('dataDisplay');
-        const closeBtn = document.querySelector('.close-btn');
-        const copyBtn = document.getElementById('copyBtn');
-        const copyMessage = document.getElementById('copyMessage');
-
-        // Hàm để hiển thị thông báo sao chép
-        function showCopyMessage() {
-            copyMessage.style.opacity = '1';
-            setTimeout(() => {
-                copyMessage.style.opacity = '0';
-            }, 2000);
-        }
-
-        // Sự kiện nhấp vào nút sao chép
-        copyBtn.addEventListener('click', () => {
-            const dataToCopy = dataDisplay.innerText;
-            if (dataToCopy) {
-                // Sử dụng document.execCommand thay vì navigator.clipboard
-                const el = document.createElement('textarea');
-                el.value = dataToCopy;
-                el.setAttribute('readonly', '');
-                el.style.position = 'absolute';
-                el.style.left = '-9999px';
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-                showCopyMessage();
-            }
-        });
-
-        // Hàm để tạo và hiển thị icon
-        function createIconElement(item) {
-            const iconItem = document.createElement('div');
-            iconItem.className = 'icon-item';
-
-            // Tạo icon từ thuộc tính "Icon" hoặc "IconInAB"
-            const iconUrl = `./${item.Icon}.png` || `./${item.IconInAB}.png`;
-            const iconImage = document.createElement('img');
-            iconImage.className = 'icon-image';
-            iconImage.src = iconUrl;
-            iconImage.alt = item.name || 'Icon';
-            iconImage.onerror = function() {
-                this.src = 'https://placehold.co/80x80/272744/ffffff?text=No+Icon';
+            // --- Function to fetch data ---
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(DATA_FILE);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    craftlandData = await response.json();
+                    currentData = craftlandData;
+                    renderItems();
+                } catch (error) {
+                    itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if ${DATA_FILE} exists and is valid.</p>`;
+                    console.error('Error fetching data:', error);
+                }
             };
 
-            const iconName = document.createElement('p');
-            iconName.className = 'text-center text-sm mt-2 truncate w-full';
-            iconName.textContent = item.name || `ID: ${item.Id}`;
+            // --- Function to render items ---
+            const renderItems = (itemsToRender = currentData) => {
+                itemListContainer.innerHTML = ''; // Clear previous content
+                if (itemsToRender.length === 0) {
+                    itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
+                    return;
+                }
 
-            iconItem.appendChild(iconImage);
-            iconItem.appendChild(iconName);
+                itemsToRender.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105');
+                    itemElement.innerHTML = `
+                        <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </div>
+                        <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
+                        <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
+                    `;
+                    itemElement.addEventListener('click', () => showItemDetails(item));
+                    itemListContainer.appendChild(itemElement);
+                });
+            };
 
-            iconItem.addEventListener('click', () => {
-                dataDisplay.textContent = JSON.stringify(item, null, 2);
-                dataModal.style.display = 'block';
+            // --- Function to show modal with details ---
+            const showItemDetails = (item) => {
+                modalTitle.textContent = item.name || 'Item Details';
+                modalContent.innerHTML = `
+                    <p><span class="font-semibold">Id:</span> ${item.Id}</p>
+                    <p><span class="font-semibold">Type:</span> ${item.Type}</p>
+                    <p><span class="font-semibold">Collection Type:</span> ${item.collectionType || 'NONE'}</p>
+                    <p><span class="font-semibold">Name:</span> ${item.name || 'No Name'}</p>
+                    <p><span class="font-semibold">Description:</span> ${item.desc || 'No Description'}</p>
+                    <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'No Icon'}</p>
+                    <p><span class="font-semibold">Rare:</span> ${item.Rare || 'NONE'}</p>
+                    <p><span class="font-semibold">Is Unique:</span> ${item.IsUnique ? 'Yes' : 'No'}</p>
+                    <p><span class="font-semibold">Icon in AB:</span> ${item.IconInAB || 'NONE'}</p>
+                `;
+                modalContainer.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContainer.querySelector('div').classList.remove('scale-95', 'opacity-0');
+                    modalContainer.querySelector('div').classList.add('scale-100', 'opacity-100');
+                }, 10);
+            };
+
+            // --- Function to hide modal ---
+            const hideModal = () => {
+                modalContainer.querySelector('div').classList.remove('scale-100', 'opacity-100');
+                modalContainer.querySelector('div').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modalContainer.classList.add('hidden');
+                }, 300);
+            };
+
+            // --- Event listeners ---
+            closeModalBtn.addEventListener('click', hideModal);
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target.id === 'modal-container') {
+                    hideModal();
+                }
             });
 
-            return iconItem;
-        }
+            // Handle bottom navigation
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const type = button.getAttribute('data-type');
+                    navButtons.forEach(btn => btn.classList.remove('bg-blue-200', 'text-blue-700'));
+                    button.classList.add('bg-blue-200', 'text-blue-700');
 
-        // Lấy dữ liệu từ file Craftland.json
-        async function fetchCraftlandData() {
-            try {
-                // Đọc file Craftland.json từ thư mục dự án
-                const response = await fetch('Craftland.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                
-                // Hiển thị từng item như một icon
-                if (Array.isArray(data)) {
-                    data.forEach(item => {
-                        const iconElement = createIconElement(item);
-                        iconGrid.appendChild(iconElement);
-                    });
-                } else {
-                    iconGrid.textContent = "Dữ liệu không phải là một mảng.";
-                }
+                    if (type === 'ALL') {
+                        currentData = craftlandData;
+                    } else {
+                        currentData = craftlandData.filter(item => item.Type === type);
+                    }
+                    renderItems();
+                });
+            });
 
-            } catch (error) {
-                console.error("Lỗi khi tải hoặc xử lý file Craftland.json:", error);
-                iconGrid.textContent = "Không thể tải dữ liệu. Vui lòng kiểm tra file Craftland.json.";
-            }
-        }
+            // Handle search input
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const filteredData = currentData.filter(item => {
+                    const name = item.name ? item.name.toLowerCase() : '';
+                    const desc = item.desc ? item.desc.toLowerCase() : '';
+                    return name.includes(query) || desc.includes(query);
+                });
+                renderItems(filteredData);
+            });
 
-        // Tải dữ liệu khi trang web được nạp
-        window.onload = fetchCraftlandData;
-
-        // Xử lý đóng modal
-        closeBtn.addEventListener('click', () => {
-            dataModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target == dataModal) {
-                dataModal.style.display = 'none';
-            }
+            // Initial data fetch
+            fetchData();
         });
     </script>
 </body>
