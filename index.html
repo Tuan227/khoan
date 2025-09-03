@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Item Browser Full Horizontal Nav</title>
+<title>Item Browser</title>
 <style>
 :root {
   --bg-color: #f5f5f7;
@@ -69,7 +69,7 @@ header button:hover {
   gap:12px;
   padding:10px;
   overflow-y: auto;
-  height: calc(100vh - 120px); /* header + nav */
+  height: calc(100vh - 120px);
 }
 
 .item-card {
@@ -136,10 +136,10 @@ header button:hover {
   background: var(--nav-bg);
   display:flex;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.bottom-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+.bottom-nav::-webkit-scrollbar { display: none; }
 .bottom-nav button {
   flex: 0 0 auto;
   border:none;
@@ -160,8 +160,8 @@ header button:hover {
 
 <header>
   <input type="text" id="search" placeholder="Search items...">
-  <button id="search-btn">🔍</button>
-  <button id="theme-btn">🌙</button>
+  <button id="search-btn"></button>
+  <button id="theme-btn"></button>
 </header>
 
 <div class="item-grid" id="item-grid"></div>
@@ -189,18 +189,6 @@ async function loadItems(){
     displayItemsByType(allItems[0]?.Type || '');
   }catch(err){
     console.error('Error loading JSON', err);
-  }
-}
-
-function getRareClass(rare){
-  switch((rare||"NONE").toLowerCase()){
-    case 'common': return 'common';
-    case 'uncommon': return 'uncommon';
-    case 'rare': return 'rare';
-    case 'epic': return 'epic';
-    case 'legend': return 'legend';
-    case 'none': return 'none';
-    default: return 'none';
   }
 }
 
@@ -232,11 +220,11 @@ function displayItemsByType(type){
 
 function createCard(grid,item,tooltip){
   const card = document.createElement('div');
-  card.className = `item-card ${getRareClass(item.Rare)}`;
+  card.className = "item-card";
   card.innerHTML=`
-    <img class="main-icon" src="${item.icon}" alt="${item.name}">
+    <img class="main-icon" src="images/${item.Icon}.png" alt="${item.name}" loading="lazy">
     ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
-    ${item.IconInAB ? `<img class="icon-ab" src="${item.IconInAB}" alt="IconAB">` : ''}
+    ${item.IconInAB ? `<img class="icon-ab" src="images/${item.IconInAB}.png" alt="IconAB">` : ''}
     <div>${item.name}</div>
   `;
   card.addEventListener('mouseenter',(e)=>{
@@ -256,7 +244,7 @@ function showDetail(item){
   const detail = document.getElementById('detail-content');
   detail.innerHTML = `
     <h3>${item.name}</h3>
-    <img src="${item.icon}" alt="${item.name}" style="width:100%;height:auto;margin-bottom:10px;object-fit:contain;">
+    <img src="images/${item.Icon}.png" alt="${item.name}" style="width:100%;height:auto;margin-bottom:10px;object-fit:contain;" loading="lazy">
     <p><strong>ID:</strong> ${item.Id}</p>
     <p><strong>Type:</strong> ${item.Type}</p>
     <p><strong>Collection:</strong> ${item.collectionType}</p>
@@ -295,7 +283,7 @@ function searchItems(){
 document.getElementById('search').addEventListener('input', searchItems);
 document.getElementById('search-btn').addEventListener('click', searchItems);
 
-// Smooth theme toggle
+// Theme toggle
 document.getElementById('theme-btn').addEventListener('click',()=>{
   const body=document.body;
   body.dataset.theme=(body.dataset.theme==='light')?'dark':'light';
