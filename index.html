@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,42 +11,104 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
         }
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.7);
+        }
+        .dark .modal-overlay {
+            background-color: rgba(255, 255, 255, 0.7);
         }
         /* Custom scrollbar for better appearance on desktop */
         .scroll-container::-webkit-scrollbar {
             height: 8px;
         }
         .scroll-container::-webkit-scrollbar-track {
-            background: #e5e7eb;
+            background: var(--bg-color);
             border-radius: 10px;
         }
         .scroll-container::-webkit-scrollbar-thumb {
-            background-color: #9ca3af;
+            background-color: var(--scrollbar-thumb-color);
             border-radius: 10px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid var(--bg-color);
+        }
+
+        /* Light/Dark Mode Styles */
+        .light body {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .dark body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .light .bg-white {
+            background-color: #ffffff;
+        }
+        .dark .bg-white {
+            background-color: #2d3748;
+        }
+        .light .bg-gray-100 {
+            background-color: #f3f4f6;
+        }
+        .dark .bg-gray-100 {
+            background-color: #1a202c;
+        }
+        .light .text-gray-800 {
+            color: #1f2937;
+        }
+        .dark .text-gray-800 {
+            color: #e5e7eb;
+        }
+        .light .text-gray-500 {
+            color: #6b7280;
+        }
+        .dark .text-gray-500 {
+            color: #a0aec0;
+        }
+        .light .border-gray-300 {
+            border-color: #d1d5db;
+        }
+        .dark .border-gray-300 {
+            border-color: #4a5568;
+        }
+        .light .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .dark .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+        .light .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- Header and Search Bar -->
-    <header class="bg-white shadow-md p-4 sticky top-0 z-50">
+    <header class="bg-white shadow-md p-4 sticky top-0 z-50 transition-colors duration-300">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
-            <div class="flex w-full sm:w-1/2 space-x-2">
-                <div class="relative flex-grow">
-                    <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </div>
-                </div>
-                <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
-                    Search
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle-btn" class="p-2 rounded-full text-gray-500 hover:text-gray-800 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path id="light-icon" d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.828 5.172a.75.75 0 010 1.061l-1.59 1.59a.75.75 0 11-1.061-1.061l1.59-1.59a.75.75 0 011.06 0zM6.707 17.293a.75.75 0 01-1.061 1.061l-1.591-1.591a.75.75 0 111.061-1.061l1.591 1.591zM19.5 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM4.5 12a.75.75 0 01-.75.75H1.5a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.293 17.293a.75.75 0 01-1.061 1.061l-1.59-1.59a.75.75 0 011.061-1.061l1.59 1.59zM5.172 5.172a.75.75 0 011.061 0l1.591 1.591a.75.75 0 11-1.06 1.061L5.172 6.233a.75.75 0 010-1.06zM12 15a3 3 0 100-6 3 3 0 000 6z"/>
+                        <path id="dark-icon" class="hidden" d="M9.598 4.043a.75.75 0 01.768-.088 8.5 8.5 0 016.96 6.96 7.5 7.5 0 00-7.796-7.796zM12 1a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V1.75a.75.75 0 01.75-.75zM4.5 12a.75.75 0 01-.75.75H1.5a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM22.5 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.293 17.293a.75.75 0 01-1.061 1.061l-1.59-1.59a.75.75 0 011.061-1.061l1.59 1.59zM5.172 5.172a.75.75 0 011.061 0l1.591 1.591a.75.75 0 11-1.06 1.061L5.172 6.233a.75.75 0 010-1.06zM6.707 17.293a.75.75 0 01-1.061 1.061l-1.591-1.591a.75.75 0 111.061-1.061l1.591 1.591z"/>
+                    </svg>
                 </button>
+                <div class="flex w-full sm:w-auto space-x-2">
+                    <div class="relative flex-grow">
+                        <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+                    <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
+                        Search
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -59,7 +121,7 @@
     </main>
 
     <!-- Bottom Navigation (Pagination) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50 transition-colors duration-300">
         <div id="pagination-container" class="max-w-4xl mx-auto flex overflow-x-auto justify-start sm:justify-center items-center space-x-2 scroll-container">
             <!-- Pagination buttons will be rendered here by JavaScript -->
         </div>
@@ -81,8 +143,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const DATA_FILE = 'Craftland.json';
-            const ITEMS_PER_PAGE = 50; // Số lượng item hiển thị trên mỗi trang
+            const ITEMS_PER_PAGE = 50;
 
+            const htmlElement = document.documentElement;
             const itemListContainer = document.getElementById('item-list-container');
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
@@ -91,6 +154,7 @@
             const modalTitle = document.getElementById('modal-title');
             const modalContent = document.getElementById('modal-content');
             const closeModalBtn = document.getElementById('close-modal-btn');
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
             
             let craftlandData = [];
             let currentFilteredData = [];
@@ -113,32 +177,27 @@
                 }
             };
 
-            // --- Function to show loading message ---
-            const showLoading = () => {
-                itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading...</p>`;
-            };
-
             // --- Function to render items for the current page ---
-            const renderItems = () => {
-                itemListContainer.innerHTML = ''; // Clear old content
-                if (currentFilteredData.length === 0) {
+            const renderItems = (itemsToRender) => {
+                itemListContainer.innerHTML = '';
+                if (itemsToRender.length === 0) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
                     return;
                 }
 
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
-                const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
+                const pageItems = itemsToRender.slice(startIndex, endIndex);
 
-                itemsToRender.forEach(item => {
+                pageItems.forEach(item => {
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105');
                     itemElement.innerHTML = `
-                        <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
+                        <div class="w-12 h-12 mb-2 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-500 dark:text-blue-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         </div>
-                        <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
-                        <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
+                        <span class="text-sm font-semibold truncate w-full text-gray-800 dark:text-gray-200">${item.name || 'No Name'}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">${item.Type || 'No Type'}</span>
                     `;
                     itemElement.addEventListener('click', () => showItemDetails(item));
                     itemListContainer.appendChild(itemElement);
@@ -153,20 +212,24 @@
                 for (let i = 1; i <= totalPages; i++) {
                     const pageButton = document.createElement('button');
                     pageButton.textContent = i;
-                    pageButton.classList.add('nav-button', 'flex-shrink-0', 'w-10', 'h-10', 'rounded-full', 'font-semibold', 'hover:bg-gray-200', 'transition-colors', 'duration-200');
+                    pageButton.classList.add('nav-button', 'flex-shrink-0', 'w-10', 'h-10', 'rounded-full', 'font-semibold', 'transition-colors', 'duration-200');
                     if (i === currentPage) {
                         pageButton.classList.add('bg-blue-500', 'text-white', 'shadow-md');
                     } else {
-                        pageButton.classList.add('bg-gray-200', 'text-gray-700');
+                        pageButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
                     }
                     pageButton.addEventListener('click', () => {
-                        showLoading();
                         currentPage = i;
                         renderPagination();
+                        
+                        // Show a temporary loading message for better UX
+                        itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading page...</p>`;
+                        
+                        // Simulate a brief load time before rendering
                         setTimeout(() => {
-                            renderItems();
+                            renderItems(currentFilteredData);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }, 100);
+                        }, 300); // 300ms delay
                     });
                     paginationContainer.appendChild(pageButton);
                 }
@@ -202,18 +265,17 @@
                 }, 300);
             };
 
-            // --- Search event handler ---
+            // --- Handle search functionality ---
             const handleSearch = () => {
-                showLoading();
                 const query = searchInput.value.toLowerCase();
                 currentFilteredData = craftlandData.filter(item => {
-                    const id = String(item.Id).toLowerCase();
+                    const id = item.Id ? item.Id.toString().toLowerCase() : '';
                     const type = item.Type ? item.Type.toLowerCase() : '';
                     const collectionType = item.collectionType ? item.collectionType.toLowerCase() : '';
                     const name = item.name ? item.name.toLowerCase() : '';
                     const desc = item.desc ? item.desc.toLowerCase() : '';
                     const icon = item.Icon ? item.Icon.toLowerCase() : '';
-
+                    
                     return id.includes(query) ||
                            type.includes(query) ||
                            collectionType.includes(query) ||
@@ -223,12 +285,21 @@
                 });
                 currentPage = 1;
                 renderPagination();
-                setTimeout(() => {
-                    renderItems();
-                }, 100);
+                renderItems(currentFilteredData);
             };
 
-            // --- Add event listeners ---
+            // --- Handle theme toggle ---
+            const toggleTheme = () => {
+                if (htmlElement.classList.contains('light')) {
+                    htmlElement.classList.remove('light');
+                    htmlElement.classList.add('dark');
+                } else {
+                    htmlElement.classList.remove('dark');
+                    htmlElement.classList.add('light');
+                }
+            };
+
+            // --- Event listeners ---
             closeModalBtn.addEventListener('click', hideModal);
             modalContainer.addEventListener('click', (e) => {
                 if (e.target.id === 'modal-container') {
@@ -242,6 +313,8 @@
                     handleSearch();
                 }
             });
+
+            themeToggleBtn.addEventListener('click', toggleTheme);
 
             // Initial data fetch
             fetchData();
