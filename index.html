@@ -16,12 +16,18 @@
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.7);
         }
+        /* Custom scrollbar for better appearance on desktop */
         .scroll-container::-webkit-scrollbar {
-            display: none;
+            height: 8px;
         }
-        .scroll-container {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .scroll-container::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #9ca3af;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
         }
     </style>
 </head>
@@ -31,40 +37,31 @@
     <header class="bg-white shadow-md p-4 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
-            <div class="relative w-full sm:w-1/2">
-                <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <div class="flex w-full sm:w-1/2 space-x-2">
+                <div class="relative flex-grow">
+                    <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
                 </div>
+                <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
+                    Search
+                </button>
             </div>
         </div>
     </header>
 
     <!-- Main content area -->
-    <main class="flex-grow p-4 overflow-auto scroll-container pb-20">
+    <main class="flex-grow p-4 pb-20">
         <div id="item-list-container" class="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading data...</p>
         </div>
     </main>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (Pagination) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50">
-        <div class="max-w-4xl mx-auto flex justify-around items-center">
-            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="ALL">
-                <span class="block">All</span>
-            </button>
-            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="AVATAR">
-                <span class="block">Avatar</span>
-            </button>
-            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="WEAPON">
-                <span class="block">Weapon</span>
-            </button>
-            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="EMOTE">
-                <span class="block">Emote</span>
-            </button>
-            <button class="nav-button flex-1 text-center py-2 px-1 text-sm font-semibold rounded-full hover:bg-gray-200 transition-colors duration-200" data-type="DEBRIS">
-                <span class="block">Debris</span>
-            </button>
+        <div id="pagination-container" class="max-w-4xl mx-auto flex overflow-x-auto justify-start sm:justify-center items-center space-x-2 scroll-container">
+            <!-- Pagination buttons will be rendered here by JavaScript -->
         </div>
     </nav>
 
@@ -84,18 +81,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const DATA_FILE = 'Craftland.json';
+            const ITEMS_PER_PAGE = 50; // Số lượng item hiển thị trên mỗi trang
+
             const itemListContainer = document.getElementById('item-list-container');
             const searchInput = document.getElementById('search-input');
-            const navButtons = document.querySelectorAll('.nav-button');
+            const searchButton = document.getElementById('search-button');
+            const paginationContainer = document.getElementById('pagination-container');
             const modalContainer = document.getElementById('modal-container');
             const modalTitle = document.getElementById('modal-title');
             const modalContent = document.getElementById('modal-content');
             const closeModalBtn = document.getElementById('close-modal-btn');
             
             let craftlandData = [];
-            let currentData = [];
+            let currentFilteredData = [];
+            let currentPage = 1;
 
-            // --- Function to fetch data ---
+            // --- Function để tải dữ liệu ---
             const fetchData = async () => {
                 try {
                     const response = await fetch(DATA_FILE);
@@ -103,7 +104,8 @@
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     craftlandData = await response.json();
-                    currentData = craftlandData;
+                    currentFilteredData = craftlandData;
+                    renderPagination();
                     renderItems();
                 } catch (error) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if ${DATA_FILE} exists and is valid.</p>`;
@@ -111,13 +113,17 @@
                 }
             };
 
-            // --- Function to render items ---
-            const renderItems = (itemsToRender = currentData) => {
-                itemListContainer.innerHTML = ''; // Clear previous content
-                if (itemsToRender.length === 0) {
+            // --- Function để hiển thị các item cho trang hiện tại ---
+            const renderItems = () => {
+                itemListContainer.innerHTML = ''; // Xóa nội dung cũ
+                if (currentFilteredData.length === 0) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
                     return;
                 }
+
+                const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+                const endIndex = startIndex + ITEMS_PER_PAGE;
+                const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
 
                 itemsToRender.forEach(item => {
                     const itemElement = document.createElement('div');
@@ -134,7 +140,31 @@
                 });
             };
 
-            // --- Function to show modal with details ---
+            // --- Function để tạo các nút phân trang ---
+            const renderPagination = () => {
+                paginationContainer.innerHTML = '';
+                const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.classList.add('nav-button', 'flex-shrink-0', 'w-10', 'h-10', 'rounded-full', 'font-semibold', 'hover:bg-gray-200', 'transition-colors', 'duration-200');
+                    if (i === currentPage) {
+                        pageButton.classList.add('bg-blue-500', 'text-white', 'shadow-md');
+                    } else {
+                        pageButton.classList.add('bg-gray-200', 'text-gray-700');
+                    }
+                    pageButton.addEventListener('click', () => {
+                        currentPage = i;
+                        renderPagination();
+                        renderItems();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    paginationContainer.appendChild(pageButton);
+                }
+            };
+
+            // --- Function để hiển thị modal với chi tiết item ---
             const showItemDetails = (item) => {
                 modalTitle.textContent = item.name || 'Item Details';
                 modalContent.innerHTML = `
@@ -155,7 +185,7 @@
                 }, 10);
             };
 
-            // --- Function to hide modal ---
+            // --- Function để ẩn modal ---
             const hideModal = () => {
                 modalContainer.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 modalContainer.querySelector('div').classList.add('scale-95', 'opacity-0');
@@ -164,7 +194,20 @@
                 }, 300);
             };
 
-            // --- Event listeners ---
+            // --- Xử lý sự kiện tìm kiếm ---
+            const handleSearch = () => {
+                const query = searchInput.value.toLowerCase();
+                currentFilteredData = craftlandData.filter(item => {
+                    const name = item.name ? item.name.toLowerCase() : '';
+                    const desc = item.desc ? item.desc.toLowerCase() : '';
+                    return name.includes(query) || desc.includes(query);
+                });
+                currentPage = 1;
+                renderPagination();
+                renderItems();
+            };
+
+            // --- Thêm các event listener ---
             closeModalBtn.addEventListener('click', hideModal);
             modalContainer.addEventListener('click', (e) => {
                 if (e.target.id === 'modal-container') {
@@ -172,34 +215,14 @@
                 }
             });
 
-            // Handle bottom navigation
-            navButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const type = button.getAttribute('data-type');
-                    navButtons.forEach(btn => btn.classList.remove('bg-blue-200', 'text-blue-700'));
-                    button.classList.add('bg-blue-200', 'text-blue-700');
-
-                    if (type === 'ALL') {
-                        currentData = craftlandData;
-                    } else {
-                        currentData = craftlandData.filter(item => item.Type === type);
-                    }
-                    renderItems();
-                });
+            searchButton.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
             });
 
-            // Handle search input
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                const filteredData = currentData.filter(item => {
-                    const name = item.name ? item.name.toLowerCase() : '';
-                    const desc = item.desc ? item.desc.toLowerCase() : '';
-                    return name.includes(query) || desc.includes(query);
-                });
-                renderItems(filteredData);
-            });
-
-            // Initial data fetch
+            // Lần đầu tải dữ liệu
             fetchData();
         });
     </script>
