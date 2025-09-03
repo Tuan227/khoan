@@ -1,295 +1,270 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Item Browser</title>
-<style>
-:root {
-  --bg-color: #f5f5f7;
-  --card-bg: #ffffff;
-  --text-color: #000000;
-  --nav-bg: #ffffff;
-  --highlight: #007aff;
-}
-[data-theme="dark"] {
-  --bg-color: #1c1c1e;
-  --card-bg: #2c2c2e;
-  --text-color: #ffffff;
-  --nav-bg: #1c1c1e;
-  --highlight: #0a84ff;
-}
-
-body {
-  margin:0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: var(--bg-color);
-  color: var(--text-color);
-}
-
-header {
-  display:flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background: var(--nav-bg);
-  position: sticky;
-  top:0;
-  z-index: 10;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-header input {
-  flex:1;
-  margin-left:10px;
-  padding:8px 12px;
-  border-radius: 12px;
-  border:1px solid #ccc;
-  font-size: 16px;
-}
-
-header button {
-  margin-left:10px;
-  padding: 6px 12px;
-  border:none;
-  border-radius: 10px;
-  background: var(--highlight);
-  color:white;
-  font-weight: bold;
-  cursor:pointer;
-  transition: background 0.2s;
-}
-header button:hover {
-  background: #005bb5;
-}
-
-.item-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
-  gap:12px;
-  padding:10px;
-  overflow-y: auto;
-  height: calc(100vh - 120px);
-}
-
-.item-card {
-  position: relative;
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 5px;
-  text-align: center;
-  cursor: pointer;
-  box-shadow:0 2px 5px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.item-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-.item-card img.main-icon { width:100%; height:100%; object-fit: contain; border-radius:8px;}
-.item-card img.unique-icon {width:20px;height:20px; position:absolute; top:5px; right:5px;}
-.item-card img.icon-ab {width:20px;height:20px; position:absolute; bottom:5px; right:5px;}
-
-.tooltip {
-  position:absolute;
-  background: rgba(0,0,0,0.8);
-  color:white;
-  padding:5px 10px;
-  border-radius:6px;
-  font-size:12px;
-  pointer-events:none;
-  opacity:0;
-  transition: opacity 0.2s;
-  z-index:10;
-  white-space: nowrap;
-}
-
-.modal {
-  display:none;
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.5);
-  justify-content: center; align-items:center;
-}
-.modal-content {
-  background: var(--card-bg);
-  padding:20px;
-  border-radius: 12px;
-  max-width:500px;
-  width:90%;
-  position: relative;
-  color: var(--text-color);
-}
-.modal-content h3 {margin-top:0;}
-.modal-content p {margin:5px 0;}
-.close {
-  position:absolute;
-  top:10px; right:15px;
-  font-size:18px;
-  cursor:pointer;
-}
-
-/* Bottom nav horizontal scroll */
-.bottom-nav {
-  position: fixed;
-  bottom:0; left:0; width:100%;
-  background: var(--nav-bg);
-  display:flex;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.bottom-nav::-webkit-scrollbar { display: none; }
-.bottom-nav button {
-  flex: 0 0 auto;
-  border:none;
-  background:none;
-  padding:8px 16px;
-  font-size:14px;
-  color: var(--text-color);
-  cursor:pointer;
-}
-.bottom-nav button.active {
-  color: var(--highlight);
-  font-weight:bold;
-  border-bottom:2px solid var(--highlight);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dữ Liệu Craftland</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+        }
+        .icon-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 16px;
+            padding: 24px;
+            max-width: 1200px;
+            margin: auto;
+        }
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #272744;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .icon-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .icon-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 8px;
+            background-color: #3b3b5c;
+            padding: 8px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #272744;
+            margin: 5% auto;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+        }
+        @keyframes animatetop {
+            from { top: -300px; opacity: 0; }
+            to { top: 0; opacity: 1; }
+        }
+        .close-btn {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #e53e3e;
+        }
+        .data-container {
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+            background-color: #1a1a2e;
+            padding: 16px;
+            border-radius: 8px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .copy-btn {
+            background-color: #38b2ac;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #319795;
+        }
+        .copy-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 101;
+        }
+        /* Style cho thanh cuộn */
+        .data-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .data-container::-webkit-scrollbar-track {
+            background: #272744;
+            border-radius: 10px;
+        }
+        .data-container::-webkit-scrollbar-thumb {
+            background-color: #4a4a6e;
+            border-radius: 10px;
+            border: 2px solid #272744;
+        }
+    </style>
 </head>
-<body data-theme="light">
+<body class="p-4">
+    <div class="max-w-7xl mx-auto p-6 bg-slate-800 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-center mb-6 text-teal-400">Dữ liệu Craftland</h1>
+        <p class="text-center text-gray-300 mb-8">Nhấp vào một icon để xem chi tiết dữ liệu.</p>
+        <div id="iconGrid" class="icon-container">
+            <!-- Icons sẽ được chèn vào đây bởi JavaScript -->
+        </div>
+    </div>
 
-<header>
-  <input type="text" id="search" placeholder="Search items...">
-  <button id="search-btn"></button>
-  <button id="theme-btn"></button>
-</header>
+    <!-- Modal để hiển thị dữ liệu chi tiết -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 class="text-xl font-bold mb-4">Chi tiết dữ liệu</h2>
+            <div id="dataDisplay" class="data-container">
+                <!-- Dữ liệu sẽ được chèn vào đây -->
+            </div>
+            <button id="copyBtn" class="copy-btn">Sao chép dữ liệu</button>
+        </div>
+    </div>
 
-<div class="item-grid" id="item-grid"></div>
+    <div id="copyMessage" class="copy-message">Đã sao chép!</div>
 
-<div id="tooltip" class="tooltip"></div>
+    <script type="module">
+        // Lấy các phần tử DOM
+        const iconGrid = document.getElementById('iconGrid');
+        const dataModal = document.getElementById('dataModal');
+        const dataDisplay = document.getElementById('dataDisplay');
+        const closeBtn = document.querySelector('.close-btn');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyMessage = document.getElementById('copyMessage');
 
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="close" id="modal-close">&times;</span>
-    <div id="detail-content"></div>
-  </div>
-</div>
+        // Hàm để hiển thị thông báo sao chép
+        function showCopyMessage() {
+            copyMessage.style.opacity = '1';
+            setTimeout(() => {
+                copyMessage.style.opacity = '0';
+            }, 2000);
+        }
 
-<div class="bottom-nav" id="bottom-nav"></div>
+        // Sự kiện nhấp vào nút sao chép
+        copyBtn.addEventListener('click', () => {
+            const dataToCopy = dataDisplay.innerText;
+            if (dataToCopy) {
+                // Sử dụng document.execCommand thay vì navigator.clipboard
+                const el = document.createElement('textarea');
+                el.value = dataToCopy;
+                el.setAttribute('readonly', '');
+                el.style.position = 'absolute';
+                el.style.left = '-9999px';
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showCopyMessage();
+            }
+        });
 
-<script>
-let allItems = [];
-let currentType = '';
+        // Hàm để tạo và hiển thị icon
+        function createIconElement(item) {
+            const iconItem = document.createElement('div');
+            iconItem.className = 'icon-item';
 
-async function loadItems(){
-  try{
-    const res = await fetch('items-OB50-live.json');
-    allItems = await res.json();
-    initNavigation();
-    displayItemsByType(allItems[0]?.Type || '');
-  }catch(err){
-    console.error('Error loading JSON', err);
-  }
-}
+            // Tạo icon từ thuộc tính "Icon" hoặc "IconInAB"
+            const iconUrl = `./${item.Icon}.png` || `./${item.IconInAB}.png`;
+            const iconImage = document.createElement('img');
+            iconImage.className = 'icon-image';
+            iconImage.src = iconUrl;
+            iconImage.alt = item.name || 'Icon';
+            iconImage.onerror = function() {
+                this.src = 'https://placehold.co/80x80/272744/ffffff?text=No+Icon';
+            };
 
-function initNavigation(){
-  const nav = document.getElementById('bottom-nav');
-  const types = [...new Set(allItems.map(item=>item.Type))];
-  nav.innerHTML='';
-  types.forEach((type,i)=>{
-    const btn = document.createElement('button');
-    btn.innerText = type || 'Other';
-    if(i===0) btn.classList.add('active');
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      displayItemsByType(type);
-    });
-    nav.appendChild(btn);
-  });
-}
+            const iconName = document.createElement('p');
+            iconName.className = 'text-center text-sm mt-2 truncate w-full';
+            iconName.textContent = item.name || `ID: ${item.Id}`;
 
-function displayItemsByType(type){
-  currentType = type;
-  const grid = document.getElementById('item-grid');
-  const tooltip = document.getElementById('tooltip');
-  const filtered = allItems.filter(item=>item.Type===type);
-  grid.innerHTML='';
-  filtered.forEach(item=>createCard(grid,item,tooltip));
-}
+            iconItem.appendChild(iconImage);
+            iconItem.appendChild(iconName);
 
-function createCard(grid,item,tooltip){
-  const card = document.createElement('div');
-  card.className = "item-card";
-  card.innerHTML=`
-    <img class="main-icon" src="images/${item.Icon}.png" alt="${item.name}" loading="lazy">
-    ${item.IsUnique ? '<img class="unique-icon" src="unique-icon.png" alt="Unique">' : ''}
-    ${item.IconInAB ? `<img class="icon-ab" src="images/${item.IconInAB}.png" alt="IconAB">` : ''}
-    <div>${item.name}</div>
-  `;
-  card.addEventListener('mouseenter',(e)=>{
-    tooltip.innerHTML=`<strong>${item.name}</strong> | Rare: ${item.Rare} | Unique: ${item.IsUnique}`;
-    tooltip.style.opacity=1;
-  });
-  card.addEventListener('mousemove',(e)=>{
-    tooltip.style.left=e.pageX+10+'px';
-    tooltip.style.top=e.pageY+10+'px';
-  });
-  card.addEventListener('mouseleave',()=>{tooltip.style.opacity=0;});
-  card.addEventListener('click',()=>showDetail(item));
-  grid.appendChild(card);
-}
+            iconItem.addEventListener('click', () => {
+                dataDisplay.textContent = JSON.stringify(item, null, 2);
+                dataModal.style.display = 'block';
+            });
 
-function showDetail(item){
-  const detail = document.getElementById('detail-content');
-  detail.innerHTML = `
-    <h3>${item.name}</h3>
-    <img src="images/${item.Icon}.png" alt="${item.name}" style="width:100%;height:auto;margin-bottom:10px;object-fit:contain;" loading="lazy">
-    <p><strong>ID:</strong> ${item.Id}</p>
-    <p><strong>Type:</strong> ${item.Type}</p>
-    <p><strong>Collection:</strong> ${item.collectionType}</p>
-    <p><strong>Description:</strong> ${item.desc}</p>
-    <p><strong>Rare:</strong> ${item.Rare}</p>
-    <p><strong>IsUnique:</strong> ${item.IsUnique}</p>
-    <p><strong>IconInAB:</strong> ${item.IconInAB || 'None'}</p>
-  `;
-  document.getElementById('modal').style.display='flex';
-}
+            return iconItem;
+        }
 
-document.getElementById('modal-close').addEventListener('click',()=>{
-  document.getElementById('modal').style.display='none';
-});
-window.addEventListener('click',(e)=>{
-  if(e.target.id==='modal') document.getElementById('modal').style.display='none';
-});
+        // Lấy dữ liệu từ file Craftland.json
+        async function fetchCraftlandData() {
+            try {
+                // Đọc file Craftland.json từ thư mục dự án
+                const response = await fetch('Craftland.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Hiển thị từng item như một icon
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        const iconElement = createIconElement(item);
+                        iconGrid.appendChild(iconElement);
+                    });
+                } else {
+                    iconGrid.textContent = "Dữ liệu không phải là một mảng.";
+                }
 
-// Search all items
-function searchItems(){
-  const keyword = document.getElementById('search').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const grid = document.getElementById('item-grid');
-  const tooltip = document.getElementById('tooltip');
-  if(keyword.trim()===''){
-    displayItemsByType(currentType);
-    return;
-  }
-  const filtered = allItems.filter(item=>{
-    const nameNorm = (item.name||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return nameNorm.includes(keyword);
-  });
-  grid.innerHTML='';
-  filtered.forEach(item=>createCard(grid,item,tooltip));
-}
+            } catch (error) {
+                console.error("Lỗi khi tải hoặc xử lý file Craftland.json:", error);
+                iconGrid.textContent = "Không thể tải dữ liệu. Vui lòng kiểm tra file Craftland.json.";
+            }
+        }
 
-document.getElementById('search').addEventListener('input', searchItems);
-document.getElementById('search-btn').addEventListener('click', searchItems);
+        // Tải dữ liệu khi trang web được nạp
+        window.onload = fetchCraftlandData;
 
-// Theme toggle
-document.getElementById('theme-btn').addEventListener('click',()=>{
-  const body=document.body;
-  body.dataset.theme=(body.dataset.theme==='light')?'dark':'light';
-});
+        // Xử lý đóng modal
+        closeBtn.addEventListener('click', () => {
+            dataModal.style.display = 'none';
+        });
 
-loadItems();
-</script>
+        window.addEventListener('click', (event) => {
+            if (event.target == dataModal) {
+                dataModal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
