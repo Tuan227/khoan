@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,117 +11,99 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
+        body.dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        body.dark .bg-white {
+            background-color: #2d3748;
+        }
+        body.dark .shadow-md, body.dark .shadow-lg, body.dark .shadow-2xl {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        body.dark .text-gray-800 {
+            color: #e2e8f0;
+        }
+        body.dark .text-gray-700 {
+            color: #cbd5e0;
+        }
+        body.dark .text-gray-500 {
+            color: #a0aec0;
+        }
+        body.dark .border-gray-300 {
+            border-color: #4a5568;
+        }
+        body.dark .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        body.dark .bg-blue-100 {
+            background-color: #2a4365;
+        }
+        body.dark .text-blue-500 {
+            color: #63b3ed;
+        }
+
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.7);
         }
-        .dark .modal-overlay {
-            background-color: rgba(255, 255, 255, 0.7);
-        }
-        /* Custom scrollbar for better appearance on desktop */
         .scroll-container::-webkit-scrollbar {
             height: 8px;
         }
         .scroll-container::-webkit-scrollbar-track {
-            background: var(--bg-color);
+            background: #e5e7eb;
             border-radius: 10px;
         }
         .scroll-container::-webkit-scrollbar-thumb {
-            background-color: var(--scrollbar-thumb-color);
+            background-color: #9ca3af;
             border-radius: 10px;
-            border: 2px solid var(--bg-color);
+            border: 2px solid #e5e7eb;
         }
-
-        /* Light/Dark Mode Styles */
-        .light body {
-            background-color: #f3f4f6;
-            color: #374151;
+        body.dark .scroll-container::-webkit-scrollbar-track {
+            background: #2d3748;
         }
-        .dark body {
-            background-color: #1a202c;
-            color: #e2e8f0;
-        }
-        .light .bg-white {
-            background-color: #ffffff;
-        }
-        .dark .bg-white {
-            background-color: #2d3748;
-        }
-        .light .bg-gray-100 {
-            background-color: #f3f4f6;
-        }
-        .dark .bg-gray-100 {
-            background-color: #1a202c;
-        }
-        .light .text-gray-800 {
-            color: #1f2937;
-        }
-        .dark .text-gray-800 {
-            color: #e5e7eb;
-        }
-        .light .text-gray-500 {
-            color: #6b7280;
-        }
-        .dark .text-gray-500 {
-            color: #a0aec0;
-        }
-        .light .border-gray-300 {
-            border-color: #d1d5db;
-        }
-        .dark .border-gray-300 {
-            border-color: #4a5568;
-        }
-        .light .shadow-md {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .dark .shadow-md {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-        }
-        .light .shadow-lg {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .dark .shadow-lg {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        body.dark .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #718096;
+            border: 2px solid #2d3748;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
     <!-- Header and Search Bar -->
-    <header class="bg-white shadow-md p-4 sticky top-0 z-50 transition-colors duration-300">
+    <header class="bg-white shadow-md p-4 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
-            <div class="flex items-center space-x-4">
-                <button id="theme-toggle-btn" class="p-2 rounded-full text-gray-500 hover:text-gray-800 transition-colors duration-200">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path id="light-icon" d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.828 5.172a.75.75 0 010 1.061l-1.59 1.59a.75.75 0 11-1.061-1.061l1.59-1.59a.75.75 0 011.06 0zM6.707 17.293a.75.75 0 01-1.061 1.061l-1.591-1.591a.75.75 0 111.061-1.061l1.591 1.591zM19.5 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM4.5 12a.75.75 0 01-.75.75H1.5a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.293 17.293a.75.75 0 01-1.061 1.061l-1.59-1.59a.75.75 0 011.061-1.061l1.59 1.59zM5.172 5.172a.75.75 0 011.061 0l1.591 1.591a.75.75 0 11-1.06 1.061L5.172 6.233a.75.75 0 010-1.06zM12 15a3 3 0 100-6 3 3 0 000 6z"/>
-                        <path id="dark-icon" class="hidden" d="M9.598 4.043a.75.75 0 01.768-.088 8.5 8.5 0 016.96 6.96 7.5 7.5 0 00-7.796-7.796zM12 1a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V1.75a.75.75 0 01.75-.75zM4.5 12a.75.75 0 01-.75.75H1.5a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM22.5 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.293 17.293a.75.75 0 01-1.061 1.061l-1.59-1.59a.75.75 0 011.061-1.061l1.59 1.59zM5.172 5.172a.75.75 0 011.061 0l1.591 1.591a.75.75 0 11-1.06 1.061L5.172 6.233a.75.75 0 010-1.06zM6.707 17.293a.75.75 0 01-1.061 1.061l-1.591-1.591a.75.75 0 111.061-1.061l1.591 1.591z"/>
-                    </svg>
-                </button>
-                <div class="flex w-full sm:w-auto space-x-2">
-                    <div class="relative flex-grow">
-                        <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </div>
+            <div class="flex w-full sm:w-1/2 space-x-2">
+                <div class="relative flex-grow">
+                    <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
-                        Search
-                    </button>
                 </div>
+                <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
+                    Search
+                </button>
             </div>
+            <button id="theme-toggle" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </button>
         </div>
     </header>
 
     <!-- Main content area -->
     <main class="flex-grow p-4 pb-20">
+        <div id="loading-spinner" class="hidden flex justify-center items-center py-10">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
         <div id="item-list-container" class="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading data...</p>
         </div>
     </main>
 
     <!-- Bottom Navigation (Pagination) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50 transition-colors duration-300">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50">
         <div id="pagination-container" class="max-w-4xl mx-auto flex overflow-x-auto justify-start sm:justify-center items-center space-x-2 scroll-container">
             <!-- Pagination buttons will be rendered here by JavaScript -->
         </div>
@@ -145,8 +127,9 @@
             const DATA_FILE = 'Craftland.json';
             const ITEMS_PER_PAGE = 50;
 
-            const htmlElement = document.documentElement;
             const itemListContainer = document.getElementById('item-list-container');
+            const loadingMessage = document.getElementById('loading-message');
+            const loadingSpinner = document.getElementById('loading-spinner');
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
             const paginationContainer = document.getElementById('pagination-container');
@@ -154,14 +137,23 @@
             const modalTitle = document.getElementById('modal-title');
             const modalContent = document.getElementById('modal-content');
             const closeModalBtn = document.getElementById('close-modal-btn');
-            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const themeToggleBtn = document.getElementById('theme-toggle');
             
             let craftlandData = [];
             let currentFilteredData = [];
             let currentPage = 1;
 
-            // --- Function to fetch data ---
+            const showLoading = () => {
+                loadingMessage.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+            };
+
+            const hideLoading = () => {
+                loadingSpinner.classList.add('hidden');
+            };
+
             const fetchData = async () => {
+                showLoading();
                 try {
                     const response = await fetch(DATA_FILE);
                     if (!response.ok) {
@@ -174,37 +166,37 @@
                 } catch (error) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if ${DATA_FILE} exists and is valid.</p>`;
                     console.error('Error fetching data:', error);
+                } finally {
+                    hideLoading();
                 }
             };
 
-            // --- Function to render items for the current page ---
-            const renderItems = (itemsToRender) => {
+            const renderItems = () => {
                 itemListContainer.innerHTML = '';
-                if (itemsToRender.length === 0) {
+                if (currentFilteredData.length === 0) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
                     return;
                 }
 
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
-                const pageItems = itemsToRender.slice(startIndex, endIndex);
+                const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
 
-                pageItems.forEach(item => {
+                itemsToRender.forEach(item => {
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105');
                     itemElement.innerHTML = `
-                        <div class="w-12 h-12 mb-2 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-500 dark:text-blue-300">
+                        <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         </div>
-                        <span class="text-sm font-semibold truncate w-full text-gray-800 dark:text-gray-200">${item.name || 'No Name'}</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">${item.Type || 'No Type'}</span>
+                        <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
+                        <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
                     `;
                     itemElement.addEventListener('click', () => showItemDetails(item));
                     itemListContainer.appendChild(itemElement);
                 });
             };
 
-            // --- Function to create pagination buttons ---
             const renderPagination = () => {
                 paginationContainer.innerHTML = '';
                 const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
@@ -221,30 +213,22 @@
                     pageButton.addEventListener('click', () => {
                         currentPage = i;
                         renderPagination();
-                        
-                        // Show a temporary loading message for better UX
-                        itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading page...</p>`;
-                        
-                        // Simulate a brief load time before rendering
-                        setTimeout(() => {
-                            renderItems(currentFilteredData);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }, 300); // 300ms delay
+                        renderItems();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     });
                     paginationContainer.appendChild(pageButton);
                 }
             };
 
-            // --- Function to show modal with item details ---
             const showItemDetails = (item) => {
                 modalTitle.textContent = item.name || 'Item Details';
                 modalContent.innerHTML = `
                     <p><span class="font-semibold">Id:</span> ${item.Id}</p>
-                    <p><span class="font-semibold">Type:</span> ${item.Type}</p>
+                    <p><span class="font-semibold">Type:</span> ${item.Type || 'NONE'}</p>
                     <p><span class="font-semibold">Collection Type:</span> ${item.collectionType || 'NONE'}</p>
                     <p><span class="font-semibold">Name:</span> ${item.name || 'No Name'}</p>
                     <p><span class="font-semibold">Description:</span> ${item.desc || 'No Description'}</p>
-                    <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'No Icon'}</p>
+                    <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'NONE'}</p>
                     <p><span class="font-semibold">Rare:</span> ${item.Rare || 'NONE'}</p>
                     <p><span class="font-semibold">Is Unique:</span> ${item.IsUnique ? 'Yes' : 'No'}</p>
                     <p><span class="font-semibold">Icon in AB:</span> ${item.IconInAB || 'NONE'}</p>
@@ -256,7 +240,6 @@
                 }, 10);
             };
 
-            // --- Function to hide modal ---
             const hideModal = () => {
                 modalContainer.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 modalContainer.querySelector('div').classList.add('scale-95', 'opacity-0');
@@ -265,41 +248,38 @@
                 }, 300);
             };
 
-            // --- Handle search functionality ---
             const handleSearch = () => {
                 const query = searchInput.value.toLowerCase();
-                currentFilteredData = craftlandData.filter(item => {
-                    const id = item.Id ? item.Id.toString().toLowerCase() : '';
-                    const type = item.Type ? item.Type.toLowerCase() : '';
-                    const collectionType = item.collectionType ? item.collectionType.toLowerCase() : '';
-                    const name = item.name ? item.name.toLowerCase() : '';
-                    const desc = item.desc ? item.desc.toLowerCase() : '';
-                    const icon = item.Icon ? item.Icon.toLowerCase() : '';
+                
+                showLoading();
+
+                // Dùng setTimeout để cho phép UI cập nhật loading spinner trước khi chạy filter
+                setTimeout(() => {
+                    currentFilteredData = craftlandData.filter(item => {
+                        return (
+                            (item.Id && String(item.Id).toLowerCase().includes(query)) ||
+                            (item.Type && item.Type.toLowerCase().includes(query)) ||
+                            (item.collectionType && item.collectionType.toLowerCase().includes(query)) ||
+                            (item.name && item.name.toLowerCase().includes(query)) ||
+                            (item.desc && item.desc.toLowerCase().includes(query)) ||
+                            (item.Icon && item.Icon.toLowerCase().includes(query)) ||
+                            (item.Rare && item.Rare.toLowerCase().includes(query)) ||
+                            (item.IsUnique && String(item.IsUnique).toLowerCase().includes(query)) ||
+                            (item.IconInAB && item.IconInAB.toLowerCase().includes(query))
+                        );
+                    });
                     
-                    return id.includes(query) ||
-                           type.includes(query) ||
-                           collectionType.includes(query) ||
-                           name.includes(query) ||
-                           desc.includes(query) ||
-                           icon.includes(query);
-                });
-                currentPage = 1;
-                renderPagination();
-                renderItems(currentFilteredData);
+                    currentPage = 1;
+                    renderPagination();
+                    renderItems();
+                    hideLoading();
+                }, 100);
             };
 
-            // --- Handle theme toggle ---
             const toggleTheme = () => {
-                if (htmlElement.classList.contains('light')) {
-                    htmlElement.classList.remove('light');
-                    htmlElement.classList.add('dark');
-                } else {
-                    htmlElement.classList.remove('dark');
-                    htmlElement.classList.add('light');
-                }
+                document.body.classList.toggle('dark');
             };
 
-            // --- Event listeners ---
             closeModalBtn.addEventListener('click', hideModal);
             modalContainer.addEventListener('click', (e) => {
                 if (e.target.id === 'modal-container') {
@@ -314,9 +294,24 @@
                 }
             });
 
+            paginationContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('nav-button')) {
+                    const page = parseInt(e.target.textContent);
+                    if (page !== currentPage) {
+                        showLoading();
+                        setTimeout(() => {
+                            currentPage = page;
+                            renderPagination();
+                            renderItems();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            hideLoading();
+                        }, 100);
+                    }
+                }
+            });
+
             themeToggleBtn.addEventListener('click', toggleTheme);
 
-            // Initial data fetch
             fetchData();
         });
     </script>
