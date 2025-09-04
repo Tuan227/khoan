@@ -11,43 +11,37 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
             transition: background-color 0.3s, color 0.3s;
         }
         body.dark {
             background-color: #1a202c;
             color: #e2e8f0;
         }
-        body.dark .bg-white {
-            background-color: #2d3748;
-        }
-        body.dark .shadow-md, body.dark .shadow-lg, body.dark .shadow-2xl {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        body.dark .text-gray-800 {
-            color: #e2e8f0;
-        }
-        body.dark .text-gray-700 {
-            color: #cbd5e0;
-        }
-        body.dark .text-gray-500 {
-            color: #a0aec0;
-        }
-        body.dark .border-gray-300 {
-            border-color: #4a5568;
-        }
-        body.dark .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-        body.dark .bg-blue-100 {
-            background-color: #2a4365;
-        }
-        body.dark .text-blue-500 {
-            color: #63b3ed;
-        }
+        .bg-white { background-color: #fff; }
+        .dark .bg-white { background-color: #2d3748; }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2); }
+        .border-gray-300 { border-color: #d1d5db; }
+        .dark .border-gray-300 { border-color: #4a5568; }
+        .text-gray-800 { color: #1f2937; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .text-gray-500 { color: #6b7280; }
+        .dark .text-gray-500 { color: #a0aec0; }
+        .bg-gray-200 { background-color: #e5e7eb; }
+        .dark .bg-gray-200 { background-color: #4a5568; }
+        .text-gray-700 { color: #374151; }
+        .dark .text-gray-700 { color: #e2e8f0; }
+        .bg-blue-100 { background-color: #dbeafe; }
+        .dark .bg-blue-100 { background-color: #2a4365; }
 
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.7);
         }
+        .dark .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        
         .scroll-container::-webkit-scrollbar {
             height: 8px;
         }
@@ -55,17 +49,17 @@
             background: #e5e7eb;
             border-radius: 10px;
         }
+        .dark .scroll-container::-webkit-scrollbar-track {
+            background: #4a5568;
+        }
         .scroll-container::-webkit-scrollbar-thumb {
             background-color: #9ca3af;
             border-radius: 10px;
             border: 2px solid #e5e7eb;
         }
-        body.dark .scroll-container::-webkit-scrollbar-track {
-            background: #2d3748;
-        }
-        body.dark .scroll-container::-webkit-scrollbar-thumb {
-            background-color: #718096;
-            border: 2px solid #2d3748;
+        .dark .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e0;
+            border: 2px solid #4a5568;
         }
     </style>
 </head>
@@ -75,9 +69,9 @@
     <header class="bg-white shadow-md p-4 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
-            <div class="flex w-full sm:w-1/2 space-x-2">
+            <div class="flex items-center space-x-2 w-full sm:w-1/2">
                 <div class="relative flex-grow">
-                    <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white text-gray-800">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
@@ -86,17 +80,15 @@
                     Search
                 </button>
             </div>
-            <button id="theme-toggle" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors duration-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" class="bg-gray-200 text-gray-800 p-2 rounded-full hover:bg-gray-300 transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             </button>
         </div>
     </header>
 
     <!-- Main content area -->
     <main class="flex-grow p-4 pb-20">
-        <div id="loading-spinner" class="hidden flex justify-center items-center py-10">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
         <div id="item-list-container" class="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading data...</p>
         </div>
@@ -128,8 +120,6 @@
             const ITEMS_PER_PAGE = 50;
 
             const itemListContainer = document.getElementById('item-list-container');
-            const loadingMessage = document.getElementById('loading-message');
-            const loadingSpinner = document.getElementById('loading-spinner');
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
             const paginationContainer = document.getElementById('pagination-container');
@@ -143,17 +133,27 @@
             let currentFilteredData = [];
             let currentPage = 1;
 
-            const showLoading = () => {
-                loadingMessage.classList.add('hidden');
-                loadingSpinner.classList.remove('hidden');
+            // --- Chức năng bật/tắt chế độ tối ---
+            const setupThemeToggle = () => {
+                const isDarkMode = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDarkMode) {
+                    document.body.classList.add('dark');
+                } else {
+                    document.body.classList.remove('dark');
+                }
+
+                themeToggleBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('dark');
+                    if (document.body.classList.contains('dark')) {
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
             };
 
-            const hideLoading = () => {
-                loadingSpinner.classList.add('hidden');
-            };
-
+            // --- Function để tải dữ liệu ---
             const fetchData = async () => {
-                showLoading();
                 try {
                     const response = await fetch(DATA_FILE);
                     if (!response.ok) {
@@ -166,13 +166,12 @@
                 } catch (error) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if ${DATA_FILE} exists and is valid.</p>`;
                     console.error('Error fetching data:', error);
-                } finally {
-                    hideLoading();
                 }
             };
 
+            // --- Function để hiển thị các item cho trang hiện tại với hiệu ứng tải ---
             const renderItems = () => {
-                itemListContainer.innerHTML = '';
+                itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading results...</p>`;
                 if (currentFilteredData.length === 0) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
                     return;
@@ -182,21 +181,36 @@
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
 
-                itemsToRender.forEach(item => {
-                    const itemElement = document.createElement('div');
-                    itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105');
-                    itemElement.innerHTML = `
-                        <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        </div>
-                        <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
-                        <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
-                    `;
-                    itemElement.addEventListener('click', () => showItemDetails(item));
-                    itemListContainer.appendChild(itemElement);
+                // Loại bỏ thông báo tải sau khi có dữ liệu để hiển thị
+                const loadingMessage = document.getElementById('loading-message');
+                if (loadingMessage) {
+                    loadingMessage.remove();
+                }
+                
+                itemsToRender.forEach((item, index) => {
+                    setTimeout(() => {
+                        const itemElement = document.createElement('div');
+                        itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105', 'transform', 'scale-0', 'opacity-0');
+                        itemElement.innerHTML = `
+                            <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                            </div>
+                            <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
+                            <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
+                        `;
+                        itemElement.addEventListener('click', () => showItemDetails(item));
+                        itemListContainer.appendChild(itemElement);
+
+                        // Hiệu ứng "pop-in"
+                        setTimeout(() => {
+                            itemElement.classList.remove('scale-0', 'opacity-0');
+                            itemElement.classList.add('scale-100', 'opacity-100');
+                        }, 10);
+                    }, index * 20); // Tải từng item với độ trễ 20ms
                 });
             };
 
+            // --- Function để tạo các nút phân trang ---
             const renderPagination = () => {
                 paginationContainer.innerHTML = '';
                 const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
@@ -208,7 +222,7 @@
                     if (i === currentPage) {
                         pageButton.classList.add('bg-blue-500', 'text-white', 'shadow-md');
                     } else {
-                        pageButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                        pageButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300', 'dark:bg-gray-700', 'dark:text-gray-200', 'dark:hover:bg-gray-600');
                     }
                     pageButton.addEventListener('click', () => {
                         currentPage = i;
@@ -220,15 +234,16 @@
                 }
             };
 
+            // --- Function để hiển thị modal với chi tiết item ---
             const showItemDetails = (item) => {
                 modalTitle.textContent = item.name || 'Item Details';
                 modalContent.innerHTML = `
                     <p><span class="font-semibold">Id:</span> ${item.Id}</p>
-                    <p><span class="font-semibold">Type:</span> ${item.Type || 'NONE'}</p>
+                    <p><span class="font-semibold">Type:</span> ${item.Type}</p>
                     <p><span class="font-semibold">Collection Type:</span> ${item.collectionType || 'NONE'}</p>
                     <p><span class="font-semibold">Name:</span> ${item.name || 'No Name'}</p>
                     <p><span class="font-semibold">Description:</span> ${item.desc || 'No Description'}</p>
-                    <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'NONE'}</p>
+                    <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'No Icon'}</p>
                     <p><span class="font-semibold">Rare:</span> ${item.Rare || 'NONE'}</p>
                     <p><span class="font-semibold">Is Unique:</span> ${item.IsUnique ? 'Yes' : 'No'}</p>
                     <p><span class="font-semibold">Icon in AB:</span> ${item.IconInAB || 'NONE'}</p>
@@ -240,6 +255,7 @@
                 }, 10);
             };
 
+            // --- Function để ẩn modal ---
             const hideModal = () => {
                 modalContainer.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 modalContainer.querySelector('div').classList.add('scale-95', 'opacity-0');
@@ -248,38 +264,33 @@
                 }, 300);
             };
 
+            // --- Xử lý sự kiện tìm kiếm ---
             const handleSearch = () => {
                 const query = searchInput.value.toLowerCase();
+                currentFilteredData = craftlandData.filter(item => {
+                    // Chuyển tất cả các trường dữ liệu thành chuỗi và chữ thường để so sánh
+                    const fields = [
+                        item.Id,
+                        item.Type,
+                        item.collectionType,
+                        item.name,
+                        item.desc,
+                        item.Icon,
+                        item.Rare,
+                        item.IsUnique,
+                        item.IconInAB
+                    ].map(field => String(field).toLowerCase());
+
+                    // Tìm kiếm trùng khớp trên tất cả các trường
+                    return fields.some(field => field.includes(query));
+                });
                 
-                showLoading();
-
-                // Dùng setTimeout để cho phép UI cập nhật loading spinner trước khi chạy filter
-                setTimeout(() => {
-                    currentFilteredData = craftlandData.filter(item => {
-                        return (
-                            (item.Id && String(item.Id).toLowerCase().includes(query)) ||
-                            (item.Type && item.Type.toLowerCase().includes(query)) ||
-                            (item.collectionType && item.collectionType.toLowerCase().includes(query)) ||
-                            (item.name && item.name.toLowerCase().includes(query)) ||
-                            (item.desc && item.desc.toLowerCase().includes(query)) ||
-                            (item.Icon && item.Icon.toLowerCase().includes(query)) ||
-                            (item.Rare && item.Rare.toLowerCase().includes(query)) ||
-                            (item.IsUnique && String(item.IsUnique).toLowerCase().includes(query)) ||
-                            (item.IconInAB && item.IconInAB.toLowerCase().includes(query))
-                        );
-                    });
-                    
-                    currentPage = 1;
-                    renderPagination();
-                    renderItems();
-                    hideLoading();
-                }, 100);
+                currentPage = 1;
+                renderPagination();
+                renderItems();
             };
 
-            const toggleTheme = () => {
-                document.body.classList.toggle('dark');
-            };
-
+            // --- Thêm các event listener ---
             closeModalBtn.addEventListener('click', hideModal);
             modalContainer.addEventListener('click', (e) => {
                 if (e.target.id === 'modal-container') {
@@ -294,24 +305,8 @@
                 }
             });
 
-            paginationContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('nav-button')) {
-                    const page = parseInt(e.target.textContent);
-                    if (page !== currentPage) {
-                        showLoading();
-                        setTimeout(() => {
-                            currentPage = page;
-                            renderPagination();
-                            renderItems();
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            hideLoading();
-                        }, 100);
-                    }
-                }
-            });
-
-            themeToggleBtn.addEventListener('click', toggleTheme);
-
+            // Lần đầu tải dữ liệu
+            setupThemeToggle();
             fetchData();
         });
     </script>
