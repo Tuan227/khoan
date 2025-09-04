@@ -37,6 +37,7 @@
 
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
         }
         .dark .modal-overlay {
             background-color: rgba(0, 0, 0, 0.9);
@@ -61,6 +62,13 @@
             background-color: #cbd5e0;
             border: 2px solid #4a5568;
         }
+
+        .data-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -68,13 +76,15 @@
     <!-- Header and Search Bar -->
     <header class="bg-white shadow-md p-4 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-            <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
+            <h1 class="text-2xl font-bold text-gray-800">OB1 - OB50 ITEM DATA</h1>
             <div class="flex items-center space-x-2 w-full sm:w-2/3">
-                <div class="relative flex-grow">
-                    <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white text-gray-800">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </div>
+                <!-- Search and Reset buttons container -->
+                <div class="relative flex-grow flex items-center">
+                    <!-- Nút reset ban đầu ẩn, sẽ hiện khi có nội dung trong input -->
+                    <button id="reset-search-button" class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-gray-600 transition-opacity duration-200 z-10 opacity-0 pointer-events-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    <input id="search-input" type="text" placeholder="Search for items..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white text-gray-800">
                 </div>
                 <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md flex-shrink-0">
                     Search
@@ -107,7 +117,7 @@
     </nav>
 
     <!-- Modal for displaying item details -->
-    <div id="modal-container" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden">
+    <div id="modal-container" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden z-[100]">
         <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 relative transform scale-95 opacity-0 transition-all duration-300 ease-out">
             <button id="close-modal-btn" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 transition-colors duration-200">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -123,7 +133,7 @@
     </div>
     
     <!-- Toast message for clipboard copy -->
-    <div id="toast-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300">
+    <div id="toast-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300 z-[101]">
         Copied to clipboard!
     </div>
 
@@ -136,6 +146,7 @@
             const itemListContainer = document.getElementById('item-list-container');
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
+            const resetSearchButton = document.getElementById('reset-search-button');
             const paginationContainer = document.getElementById('pagination-container');
             const modalContainer = document.getElementById('modal-container');
             const modalTitle = document.getElementById('modal-title');
@@ -151,7 +162,7 @@
             let currentFilteredData = [];
             let currentPage = 1;
 
-            // --- Chức năng bật/tắt chế độ tối ---
+            // --- Function to toggle dark mode ---
             const setupThemeToggle = () => {
                 const isDarkMode = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 if (isDarkMode) {
@@ -170,7 +181,7 @@
                 });
             };
 
-            // --- Function để tải dữ liệu ---
+            // --- Function to fetch data ---
             const fetchData = async () => {
                 try {
                     const [dataResponse, pngResponse] = await Promise.all([
@@ -218,7 +229,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             `;
 
-            // --- Function để hiển thị các item cho trang hiện tại với hiệu ứng tải ---
+            // --- Function to render items for the current page with a loading effect ---
             const renderItems = () => {
                 itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading results...</p>`;
 
@@ -262,7 +273,7 @@
                 }, 100);
             };
 
-            // --- Function để tạo các nút phân trang ---
+            // --- Function to create pagination buttons ---
             const renderPagination = () => {
                 paginationContainer.innerHTML = '';
                 const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
@@ -286,7 +297,18 @@
                 }
             };
 
-            // --- Function để hiển thị modal với chi tiết item ---
+            // --- Function to copy text to clipboard ---
+            const copyToClipboard = (text) => {
+                const tempInput = document.createElement('input');
+                document.body.appendChild(tempInput);
+                tempInput.value = text;
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast('Copied to clipboard!');
+            };
+
+            // --- Function to show item details modal ---
             const showItemDetails = (item) => {
                 modalTitle.textContent = item.name || 'Item Details';
                 
@@ -298,16 +320,71 @@
                 }
 
                 modalContent.innerHTML = `
-                    <p><span class="font-semibold">Id:</span> ${item.Id}</p>
-                    <p><span class="font-semibold">Type:</span> ${item.Type}</p>
-                    <p><span class="font-semibold">Collection Type:</span> ${item.collectionType || 'NONE'}</p>
-                    <p><span class="font-semibold">Name:</span> ${item.name || 'No Name'}</p>
-                    <p><span class="font-semibold">Description:</span> ${item.desc || 'No Description'}</p>
-                    <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'No Icon'}</p>
-                    <p><span class="font-semibold">Rare:</span> ${item.Rare || 'NONE'}</p>
-                    <p><span class="font-semibold">Is Unique:</span> ${item.IsUnique ? 'Yes' : 'No'}</p>
-                    <p><span class="font-semibold">Icon in AB:</span> ${item.IconInAB || 'NONE'}</p>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Id:</span> ${item.Id}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.Id}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Type:</span> ${item.Type}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.Type}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Collection Type:</span> ${item.collectionType || 'NONE'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.collectionType || 'NONE'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Name:</span> ${item.name || 'No Name'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.name || 'No Name'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Description:</span> ${item.desc || 'No Description'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.desc || 'No Description'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Icon Name:</span> ${item.Icon || 'No Icon'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.Icon || 'No Icon'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Rare:</span> ${item.Rare || 'NONE'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.Rare || 'NONE'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Is Unique:</span> ${item.IsUnique ? 'Yes' : 'No'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.IsUnique ? 'Yes' : 'No'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="data-item">
+                        <p><span class="font-semibold">Icon in AB:</span> ${item.IconInAB || 'NONE'}</p>
+                        <button class="copy-btn text-gray-400 hover:text-gray-600 transition-colors duration-200" data-copy-text="${item.IconInAB || 'NONE'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h3a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 18H5a2 2 0 01-2-2v-1a2 2 0 012-2h1"></path></svg>
+                        </button>
+                    </div>
                 `;
+
+                // Add event listeners to the new copy buttons
+                const copyButtons = modalContent.querySelectorAll('.copy-btn');
+                copyButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const textToCopy = e.currentTarget.dataset.copyText;
+                        copyToClipboard(textToCopy);
+                    });
+                });
+
                 modalContainer.classList.remove('hidden');
                 setTimeout(() => {
                     modalContainer.querySelector('div').classList.remove('scale-95', 'opacity-0');
@@ -315,7 +392,7 @@
                 }, 10);
             };
 
-            // --- Function để ẩn modal ---
+            // --- Function to hide modal ---
             const hideModal = () => {
                 modalContainer.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 modalContainer.querySelector('div').classList.add('scale-95', 'opacity-0');
@@ -335,7 +412,7 @@
                 }, 2000);
             };
 
-            // --- Xử lý sự kiện tìm kiếm và cập nhật URL ---
+            // --- Handle search and update URL ---
             const handleSearch = (updateUrl = true) => {
                 const query = searchInput.value.toLowerCase();
                 
@@ -366,8 +443,17 @@
                 renderPagination();
                 renderItems();
             };
+
+            // --- Handle search reset ---
+            const handleResetSearch = () => {
+                searchInput.value = '';
+                handleSearch();
+                // Ẩn nút reset sau khi reset tìm kiếm
+                resetSearchButton.classList.remove('opacity-100');
+                resetSearchButton.classList.add('opacity-0', 'pointer-events-none');
+            };
             
-            // --- Xử lý chức năng chia sẻ ---
+            // --- Handle share functionality ---
             const handleShare = async () => {
                 const url = window.location.href;
                 try {
@@ -379,13 +465,7 @@
                         });
                     } else {
                         // Fallback to clipboard
-                        const tempInput = document.createElement('input');
-                        document.body.appendChild(tempInput);
-                        tempInput.value = url;
-                        tempInput.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempInput);
-                        showToast('Đã sao chép vào khay nhớ tạm!');
+                        copyToClipboard(url);
                     }
                 } catch (error) {
                     console.error('Error sharing:', error);
@@ -401,6 +481,19 @@
             });
 
             searchButton.addEventListener('click', () => handleSearch());
+            resetSearchButton.addEventListener('click', () => handleResetSearch());
+
+            // Listen for input events to show/hide the reset button
+            searchInput.addEventListener('input', () => {
+                if (searchInput.value.trim() !== '') {
+                    resetSearchButton.classList.remove('opacity-0', 'pointer-events-none');
+                    resetSearchButton.classList.add('opacity-100');
+                } else {
+                    resetSearchButton.classList.remove('opacity-100');
+                    resetSearchButton.classList.add('opacity-0', 'pointer-events-none');
+                }
+            });
+
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     handleSearch();
