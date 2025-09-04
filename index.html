@@ -107,7 +107,10 @@
             <button id="close-modal-btn" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 transition-colors duration-200">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 id="modal-title" class="text-xl font-bold mb-4 text-gray-800">Item Details</h2>
+            <h2 id="modal-title" class="text-xl font-bold mb-4 text-gray-800 text-center">Item Details</h2>
+            <div id="modal-image-container" class="flex justify-center mb-4">
+                <!-- Item image will be inserted here -->
+            </div>
             <div id="modal-content" class="text-gray-700 space-y-2">
                 <!-- Item details will be inserted here by JavaScript -->
             </div>
@@ -117,6 +120,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const DATA_FILE = 'Craftland.json';
+            const PNG_FILE = 'png.json';
             const ITEMS_PER_PAGE = 50;
 
             const itemListContainer = document.getElementById('item-list-container');
@@ -125,11 +129,13 @@
             const paginationContainer = document.getElementById('pagination-container');
             const modalContainer = document.getElementById('modal-container');
             const modalTitle = document.getElementById('modal-title');
+            const modalImageContainer = document.getElementById('modal-image-container');
             const modalContent = document.getElementById('modal-content');
             const closeModalBtn = document.getElementById('close-modal-btn');
             const themeToggleBtn = document.getElementById('theme-toggle');
             
             let craftlandData = [];
+            let itemImageMap = new Map();
             let currentFilteredData = [];
             let currentPage = 1;
 
@@ -155,30 +161,52 @@
             // --- Function để tải dữ liệu ---
             const fetchData = async () => {
                 try {
-                    const response = await fetch(DATA_FILE);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    // Fetch data and images in parallel
+                    const [dataResponse, pngResponse] = await Promise.all([
+                        fetch(DATA_FILE),
+                        fetch(PNG_FILE)
+                    ]);
+                    
+                    if (!dataResponse.ok) {
+                        throw new Error(`HTTP error! status: ${dataResponse.status} for ${DATA_FILE}`);
                     }
-                    craftlandData = await response.json();
+                    if (!pngResponse.ok) {
+                        throw new Error(`HTTP error! status: ${pngResponse.status} for ${PNG_FILE}`);
+                    }
+
+                    craftlandData = await dataResponse.json();
+                    const pngUrls = await pngResponse.json();
+
+                    // Map image URLs to item IDs
+                    pngUrls.images.forEach(url => {
+                        const idMatch = url.match(/\/(\d+)\.png$/);
+                        if (idMatch) {
+                            itemImageMap.set(Number(idMatch[1]), url);
+                        }
+                    });
+
                     currentFilteredData = craftlandData;
                     renderPagination();
                     renderItems();
                 } catch (error) {
-                    itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if ${DATA_FILE} exists and is valid.</p>`;
+                    itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if files exist and are valid.</p>`;
                     console.error('Error fetching data:', error);
                 }
             };
 
+            // Placeholder SVG for items without an image
+            const placeholderSvg = `
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            `;
+
             // --- Function để hiển thị các item cho trang hiện tại với hiệu ứng tải ---
             const renderItems = () => {
-                // Loại bỏ thông báo tải trước khi render
                 itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading results...</p>`;
 
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
 
-                // Thêm một độ trễ nhỏ để hiển thị thông báo "Loading results..."
                 setTimeout(() => {
                     itemListContainer.innerHTML = ''; // Xóa nội dung cũ
                     if (currentFilteredData.length === 0) {
@@ -190,9 +218,15 @@
                         setTimeout(() => {
                             const itemElement = document.createElement('div');
                             itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105', 'transform', 'scale-0', 'opacity-0');
+                            
+                            const imageUrl = itemImageMap.get(item.Id);
+                            const imageOrPlaceholder = imageUrl 
+                                ? `<img src="${imageUrl}" alt="${item.name || 'No Name'}" class="w-full h-full object-cover">`
+                                : placeholderSvg;
+
                             itemElement.innerHTML = `
-                                <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                                <div class="w-12 h-12 mb-2 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 overflow-hidden dark:bg-gray-700 dark:text-gray-500">
+                                    ${imageOrPlaceholder}
                                 </div>
                                 <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
                                 <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
@@ -200,14 +234,13 @@
                             itemElement.addEventListener('click', () => showItemDetails(item));
                             itemListContainer.appendChild(itemElement);
 
-                            // Hiệu ứng "pop-in"
                             setTimeout(() => {
                                 itemElement.classList.remove('scale-0', 'opacity-0');
                                 itemElement.classList.add('scale-100', 'opacity-100');
                             }, 10);
-                        }, index * 20); // Tải từng item với độ trễ 20ms
+                        }, index * 20);
                     });
-                }, 100); // Thêm độ trễ 100ms trước khi bắt đầu tải item
+                }, 100);
             };
 
             // --- Function để tạo các nút phân trang ---
@@ -237,6 +270,14 @@
             // --- Function để hiển thị modal với chi tiết item ---
             const showItemDetails = (item) => {
                 modalTitle.textContent = item.name || 'Item Details';
+                
+                const imageUrl = itemImageMap.get(item.Id);
+                if (imageUrl) {
+                    modalImageContainer.innerHTML = `<img src="${imageUrl}" alt="${item.name || 'Item Icon'}" class="w-24 h-24 rounded-full object-cover shadow-lg">`;
+                } else {
+                    modalImageContainer.innerHTML = `<div class="w-24 h-24 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500">${placeholderSvg}</div>`;
+                }
+
                 modalContent.innerHTML = `
                     <p><span class="font-semibold">Id:</span> ${item.Id}</p>
                     <p><span class="font-semibold">Type:</span> ${item.Type}</p>
@@ -268,7 +309,6 @@
             const handleSearch = () => {
                 const query = searchInput.value.toLowerCase();
                 currentFilteredData = craftlandData.filter(item => {
-                    // Chuyển tất cả các trường dữ liệu thành chuỗi và chữ thường để so sánh
                     const fields = [
                         item.Id,
                         item.Type,
@@ -281,7 +321,6 @@
                         item.IconInAB
                     ].map(field => String(field).toLowerCase());
 
-                    // Tìm kiếm trùng khớp trên tất cả các trường
                     return fields.some(field => field.includes(query));
                 });
                 
