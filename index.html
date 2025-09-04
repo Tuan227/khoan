@@ -69,21 +69,26 @@
     <header class="bg-white shadow-md p-4 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 class="text-2xl font-bold text-gray-800">Craftland Item List</h1>
-            <div class="flex items-center space-x-2 w-full sm:w-1/2">
+            <div class="flex items-center space-x-2 w-full sm:w-2/3">
                 <div class="relative flex-grow">
                     <input id="search-input" type="text" placeholder="Search by name or description..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white text-gray-800">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
-                <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
+                <button id="search-button" class="bg-blue-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md flex-shrink-0">
                     Search
                 </button>
             </div>
-            <!-- Theme Toggle Button -->
-            <button id="theme-toggle" class="bg-gray-200 text-gray-800 p-2 rounded-full hover:bg-gray-300 transition-colors duration-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            </button>
+            <!-- Theme Toggle and Share Buttons -->
+            <div class="flex items-center space-x-2">
+                <button id="share-button" class="bg-blue-500 text-white p-2 rounded-full font-semibold hover:bg-blue-600 transition-colors duration-200 shadow-md">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z"></path></svg>
+                </button>
+                <button id="theme-toggle" class="bg-gray-200 text-gray-800 p-2 rounded-full hover:bg-gray-300 transition-colors duration-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -116,6 +121,11 @@
             </div>
         </div>
     </div>
+    
+    <!-- Toast message for clipboard copy -->
+    <div id="toast-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300">
+        Copied to clipboard!
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -133,6 +143,8 @@
             const modalContent = document.getElementById('modal-content');
             const closeModalBtn = document.getElementById('close-modal-btn');
             const themeToggleBtn = document.getElementById('theme-toggle');
+            const shareButton = document.getElementById('share-button');
+            const toastMessage = document.getElementById('toast-message');
             
             let craftlandData = [];
             let itemImageMap = new Map();
@@ -161,7 +173,6 @@
             // --- Function để tải dữ liệu ---
             const fetchData = async () => {
                 try {
-                    // Fetch data and images in parallel
                     const [dataResponse, pngResponse] = await Promise.all([
                         fetch(DATA_FILE),
                         fetch(PNG_FILE)
@@ -177,7 +188,6 @@
                     craftlandData = await dataResponse.json();
                     const pngUrls = await pngResponse.json();
 
-                    // Map image URLs to item IDs
                     pngUrls.images.forEach(url => {
                         const idMatch = url.match(/\/(\d+)\.png$/);
                         if (idMatch) {
@@ -186,8 +196,17 @@
                     });
 
                     currentFilteredData = craftlandData;
-                    renderPagination();
-                    renderItems();
+                    // Check for search query in URL on initial load
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const query = urlParams.get('q');
+                    if (query) {
+                        searchInput.value = query;
+                        handleSearch(false); // Pass false to avoid updating URL again
+                    } else {
+                        renderPagination();
+                        renderItems();
+                    }
+
                 } catch (error) {
                     itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error loading data: ${error.message}. Please check if files exist and are valid.</p>`;
                     console.error('Error fetching data:', error);
@@ -208,7 +227,7 @@
                 const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
 
                 setTimeout(() => {
-                    itemListContainer.innerHTML = ''; // Xóa nội dung cũ
+                    itemListContainer.innerHTML = '';
                     if (currentFilteredData.length === 0) {
                         itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error: No results found for this search. Please try a different keyword.</p>`;
                         return;
@@ -304,10 +323,29 @@
                     modalContainer.classList.add('hidden');
                 }, 300);
             };
+            
+            // --- Function to show a toast message for clipboard copy ---
+            const showToast = (message) => {
+                toastMessage.textContent = message;
+                toastMessage.classList.remove('opacity-0');
+                toastMessage.classList.add('opacity-100');
+                setTimeout(() => {
+                    toastMessage.classList.remove('opacity-100');
+                    toastMessage.classList.add('opacity-0');
+                }, 2000);
+            };
 
-            // --- Xử lý sự kiện tìm kiếm ---
-            const handleSearch = () => {
+            // --- Xử lý sự kiện tìm kiếm và cập nhật URL ---
+            const handleSearch = (updateUrl = true) => {
                 const query = searchInput.value.toLowerCase();
+                
+                if (updateUrl) {
+                    const newUrl = query
+                        ? `${window.location.origin}${window.location.pathname}?q=${encodeURIComponent(query)}`
+                        : `${window.location.origin}${window.location.pathname}`;
+                    history.pushState({}, '', newUrl);
+                }
+                
                 currentFilteredData = craftlandData.filter(item => {
                     const fields = [
                         item.Id,
@@ -328,6 +366,31 @@
                 renderPagination();
                 renderItems();
             };
+            
+            // --- Xử lý chức năng chia sẻ ---
+            const handleShare = async () => {
+                const url = window.location.href;
+                try {
+                    if (navigator.share) {
+                        // Use Web Share API if available
+                        await navigator.share({
+                            title: 'Craftland Item Search',
+                            url: url
+                        });
+                    } else {
+                        // Fallback to clipboard
+                        const tempInput = document.createElement('input');
+                        document.body.appendChild(tempInput);
+                        tempInput.value = url;
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                        showToast('Đã sao chép vào khay nhớ tạm!');
+                    }
+                } catch (error) {
+                    console.error('Error sharing:', error);
+                }
+            };
 
             // --- Thêm các event listener ---
             closeModalBtn.addEventListener('click', hideModal);
@@ -337,12 +400,13 @@
                 }
             });
 
-            searchButton.addEventListener('click', handleSearch);
+            searchButton.addEventListener('click', () => handleSearch());
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     handleSearch();
                 }
             });
+            shareButton.addEventListener('click', handleShare);
 
             // Lần đầu tải dữ liệu
             setupThemeToggle();
