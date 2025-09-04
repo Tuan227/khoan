@@ -171,43 +171,43 @@
 
             // --- Function để hiển thị các item cho trang hiện tại với hiệu ứng tải ---
             const renderItems = () => {
+                // Loại bỏ thông báo tải trước khi render
                 itemListContainer.innerHTML = `<p id="loading-message" class="col-span-full text-center text-lg text-gray-500 font-medium">Loading results...</p>`;
-                if (currentFilteredData.length === 0) {
-                    itemListContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 font-medium">No items found.</p>`;
-                    return;
-                }
 
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 const itemsToRender = currentFilteredData.slice(startIndex, endIndex);
 
-                // Loại bỏ thông báo tải sau khi có dữ liệu để hiển thị
-                const loadingMessage = document.getElementById('loading-message');
-                if (loadingMessage) {
-                    loadingMessage.remove();
-                }
-                
-                itemsToRender.forEach((item, index) => {
-                    setTimeout(() => {
-                        const itemElement = document.createElement('div');
-                        itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105', 'transform', 'scale-0', 'opacity-0');
-                        itemElement.innerHTML = `
-                            <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                            </div>
-                            <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
-                            <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
-                        `;
-                        itemElement.addEventListener('click', () => showItemDetails(item));
-                        itemListContainer.appendChild(itemElement);
+                // Thêm một độ trễ nhỏ để hiển thị thông báo "Loading results..."
+                setTimeout(() => {
+                    itemListContainer.innerHTML = ''; // Xóa nội dung cũ
+                    if (currentFilteredData.length === 0) {
+                        itemListContainer.innerHTML = `<p class="col-span-full text-center text-red-500 font-medium">Error: No results found for this search. Please try a different keyword.</p>`;
+                        return;
+                    }
 
-                        // Hiệu ứng "pop-in"
+                    itemsToRender.forEach((item, index) => {
                         setTimeout(() => {
-                            itemElement.classList.remove('scale-0', 'opacity-0');
-                            itemElement.classList.add('scale-100', 'opacity-100');
-                        }, 10);
-                    }, index * 20); // Tải từng item với độ trễ 20ms
-                });
+                            const itemElement = document.createElement('div');
+                            itemElement.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'items-center', 'text-center', 'cursor-pointer', 'transition-transform', 'duration-200', 'hover:scale-105', 'transform', 'scale-0', 'opacity-0');
+                            itemElement.innerHTML = `
+                                <div class="w-12 h-12 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                                </div>
+                                <span class="text-sm font-semibold truncate w-full">${item.name || 'No Name'}</span>
+                                <span class="text-xs text-gray-500">${item.Type || 'No Type'}</span>
+                            `;
+                            itemElement.addEventListener('click', () => showItemDetails(item));
+                            itemListContainer.appendChild(itemElement);
+
+                            // Hiệu ứng "pop-in"
+                            setTimeout(() => {
+                                itemElement.classList.remove('scale-0', 'opacity-0');
+                                itemElement.classList.add('scale-100', 'opacity-100');
+                            }, 10);
+                        }, index * 20); // Tải từng item với độ trễ 20ms
+                    });
+                }, 100); // Thêm độ trễ 100ms trước khi bắt đầu tải item
             };
 
             // --- Function để tạo các nút phân trang ---
